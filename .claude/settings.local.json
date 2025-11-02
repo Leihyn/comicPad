@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git remote set-url:*)",
+      "Bash(git push:*)",
+      "Bash(printf:*)",
+      "Bash(git credential:*)",
+      "Bash(GIT_TERMINAL_PROMPT=1 git push:*)",
+      "Bash(git branch:*)",
+      "Bash(npm run dev:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill /F /PID 21440)",
+      "Bash(taskkill //F //PID 21440)",
+      "Bash(curl:*)",
+      "Bash(taskkill //F //PID 11436)",
+      "Bash(src/server.js)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

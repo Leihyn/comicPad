@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Righteous&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#0A0A0A] text-white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+}
+
+@layer components {
+  /* Comic-style buttons */
+  .btn-comic {
+    @apply px-8 py-4 bg-gradient-to-br from-comic-yellow to-comic-orange text-dark-900 font-comic text-lg font-bold rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.8)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 border-4 border-dark-900;
+  }
+
+  .btn-comic-outline {
+    @apply px-8 py-4 bg-transparent text-comic-yellow font-comic text-lg font-bold rounded-lg border-4 border-comic-yellow shadow-[4px_4px_0px_0px_rgba(255,215,0,0.4)] hover:bg-comic-yellow hover:text-dark-900 transition-all duration-200;
+  }
+
+  /* Comic panel styling */
+  .comic-panel {
+    @apply bg-dark-800 rounded-2xl border-4 border-dark-600 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] transition-all duration-300;
+  }
+
+  /* Badge styling */
+  .badge-pow {
+    @apply inline-flex items-center px-6 py-3 bg-comic-red text-white font-comic text-sm rounded-full border-4 border-dark-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)];
+  }
+
+  /* Animated border */
+  .border-animated {
+    @apply relative;
+  }
+
+  .border-animated::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: linear-gradient(45deg, #FFD700, #FF0000, #0066FF, #FFD700);
+    border-radius: 1.5rem;
+    z-index: -1;
+    animation: spin 3s linear infinite;
+  }
+
+  /* Halftone pattern effect */
+  .halftone {
+    background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 10px 10px;
+  }
+}
+
+@layer utilities {
+  @keyframes spin {
+    0% {
+      background-position: 0% 50%;
+      transform: rotate(0deg);
+    }
+    100% {
+      background-position: 100% 50%;
+      transform: rotate(360deg);
+    }
+  }
+}

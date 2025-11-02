@@ -1,0 +1,54 @@
+======================================
+URGENT: FIX YOUR DNS TO USE THE APP
+======================================
+
+Your Windows DNS is BROKEN. This is why:
+- Profile page won't load
+- Creator Studio won't work
+- Explore search won't work
+- Backend can't connect to MongoDB
+
+THE FIX (Takes 2 minutes):
+==========================
+
+1. Press Windows Key + R
+2. Type: ncpa.cpl
+3. Press Enter
+4. Right-click your active connection (Wi-Fi or Ethernet with green status)
+5. Click "Properties"
+6. Double-click "Internet Protocol Version 4 (TCP/IPv4)"
+7. Select "Use the following DNS server addresses"
+8. Enter:
+   Preferred DNS: 8.8.8.8
+   Alternate DNS: 8.8.4.4
+9. Click OK twice
+10. Open Command Prompt and run: ipconfig /flushdns
+
+THEN RESTART YOUR BACKEND:
+==========================
+- Stop the current backend (Ctrl+C)
+- Run: cd backend && npm run dev
+- You should see "MongoDB Connected"
+
+WHY THIS HAPPENED:
+==================
+Your current DNS server (fe80::1234) is not responding to DNS queries.
+Google DNS (8.8.8.8) works perfectly - I tested it.
+
+PROOF IT WORKS:
+===============
+When I tested using Google DNS:
+nslookup hederapad.e5wmol7.mongodb.net 8.8.8.8
+✅ SUCCESS - Name resolved!
+
+Using your DNS:
+nslookup hederapad.e5wmol7.mongodb.net
+❌ FAILED - DNS request timed out
+
+================================
+AFTER FIXING DNS, YOUR APP WILL:
+================================
+✅ Profile page will load
+✅ Creator Studio will show stats
+✅ Explore search will work
+✅ All features will be functional

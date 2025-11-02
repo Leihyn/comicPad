@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HashPack Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #1a5f1a; }
+        .error { background: #5f1a1a; }
+        .warning { background: #5f5f1a; }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover { background: #45a049; }
+        pre {
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 HashPack Connection Diagnostic</h1>
+
+    <div class="test-section">
+        <h2>Step 1: Environment Check</h2>
+        <div id="env-check"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 2: LocalStorage Check</h2>
+        <button onclick="checkLocalStorage()">Check LocalStorage</button>
+        <button onclick="clearWalletSessions()">Clear WalletConnect Sessions</button>
+        <div id="storage-check"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 3: Extension Detection</h2>
+        <button onclick="checkExtensions()">Check Browser Extensions</button>
+        <div id="extension-check"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 4: HashPack Direct Connection</h2>
+        <button onclick="testHashPackDirect()">Test HashPack Extension</button>
+        <div id="hashpack-test"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Step 5: Network Check</h2>
+        <button onclick="testWebSocket()">Test WebSocket Connection</button>
+        <div id="network-check"></div>
+    </div>
+
+    <script>
+        // Step 1: Auto-run environment check
+        window.onload = () => {
+            const envDiv = document.getElementById('env-check');
+            let html = '<div class="status success">✅ Browser: ' + navigator.userAgent.split(' ').pop() + '</div>';
+            html += '<div class="status success">✅ Protocol: ' + window.location.protocol + '</div>';
+            html += '<div class="status success">✅ Origin: ' + window.location.origin + '</div>';
+            envDiv.innerHTML = html;
+        };
+
+        // Step 2: LocalStorage check
+        function checkLocalStorage() {
+            const div = document.getElementById('storage-check');
+            const wcKeys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('wc') || key.includes('wallet'))) {
+                    wcKeys.push(key);
+                }
+            }
+
+            if (wcKeys.length > 0) {
+                div.innerHTML = `<div class="status warning">⚠️ Found ${wcKeys.length} WalletConnect keys (may cause issues):</div><pre>${wcKeys.join('\n')}</pre>`;
+            } else {
+                div.innerHTML = '<div class="status success">✅ No stale WalletConnect sessions</div>';
+            }
+        }
+
+        function clearWalletSessions() {
+            let count = 0;
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('wc@2') || key.startsWith('wc_') || key.includes('walletconnect'))) {
+                    localStorage.removeItem(key);
+                    count++;
+                }
+            }
+            document.getElementById('storage-check').innerHTML =
+                `<div class="status success">✅ Cleared ${count} WalletConnect sessions. Refresh page to test.</div>`;
+        }
+
+        // Step 3: Extension detection
+        function checkExtensions() {
+            const div = document.getElementById('extension-check');
+            let html = '';
+
+            // Check for various wallet extensions
+            const wallets = {
+                'window.ethereum': 'EVM wallet (MetaMask, etc.)',
+                'window.tronWeb': 'TronLink',
+                'window.hashpack': 'HashPack (old API)',
+                'window.hedera': 'Hedera wallet'
+            };
+
+            for (const [key, name] of Object.entries(wallets)) {
+                const exists = eval(key) !== undefined;
+                const className = exists ? 'success' : 'warning';
+                const icon = exists ? '✅' : '⚠️';
+                html += `<div class="status ${className}">${icon} ${name}: ${exists ? 'Detected' : 'Not found'}</div>`;
+            }
+
+            div.innerHTML = html;
+        }
+
+        // Step 4: HashPack direct connection test
+        async function testHashPackDirect() {
+            const div = document.getElementById('hashpack-test');
+            div.innerHTML = '<div class="status warning">⏳ Testing HashPack extension...</div>';
+
+            try {
+                // Try HashPack extension pairing
+                if (window.hashpack) {
+                    div.innerHTML = '<div class="status error">❌ Old HashPack API detected. Please use WalletConnect instead.</div>';
+                    return;
+                }
+
+                // Check if HashPack extension injects anything
+                div.innerHTML = '<div class="status warning">⚠️ HashPack uses WalletConnect. Please test WalletConnect in Step 5.</div>';
+
+            } catch (error) {
+                div.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        // Step 5: WebSocket test
+        async function testWebSocket() {
+            const div = document.getElementById('network-check');
+            div.innerHTML = '<div class="status warning">⏳ Testing WebSocket connection to WalletConnect relay...</div>';
+
+            try {
+                const ws = new WebSocket('wss://relay.walletconnect.com');
+
+                const timeout = setTimeout(() => {
+                    ws.close();
+                    div.innerHTML = '<div class="status error">❌ WebSocket timeout. Check firewall/network settings.</div>';
+                }, 5000);
+
+                ws.onopen = () => {
+                    clearTimeout(timeout);
+                    ws.close();
+                    div.innerHTML = '<div class="status success">✅ WebSocket connection successful!</div>';
+                };
+
+                ws.onerror = (error) => {
+                    clearTimeout(timeout);
+                    div.innerHTML = `<div class="status error">❌ WebSocket error: ${error.type}</div>`;
+                };
+
+            } catch (error) {
+                div.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
