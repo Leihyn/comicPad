@@ -6,13 +6,15 @@ import Comic from './Comic.js';
 import Episode from './Episode.js';
 import Listing from './Listing.js';
 import ReadHistory from './ReadHistory.js';
+import MarketplaceTransaction from './MarketplaceTransaction.js';
 
 export {
   User,
   Comic,
   Episode,
   Listing,
-  ReadHistory
+  ReadHistory,
+  MarketplaceTransaction
 };
 
 export default {
@@ -20,5 +22,6 @@ export default {
   Comic,
   Episode,
   Listing,
-  ReadHistory
+  ReadHistory,
+  MarketplaceTransaction
 };

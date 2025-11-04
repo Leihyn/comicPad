@@ -10,7 +10,10 @@ import {
   getListings,
   getListing,
   getMyListings,
-  getMarketplaceStats
+  getMarketplaceStats,
+  getMarketplaceHistory,
+  getTransaction,
+  getTransactionStats
 } from '../controllers/marketplaceControllerEnhanced.js';
 // Import the working createListing from old controller for backward compatibility
 import { createListing as createListingOld } from '../controllers/marketplaceController.js';
@@ -22,6 +25,7 @@ const router = express.Router();
 router.get('/listings', getListings);
 router.get('/listings/:listingId', getListing);
 router.get('/stats', getMarketplaceStats);
+router.get('/stats/transactions', getTransactionStats);
 router.get('/operator', (req, res) => {
   res.json({
     success: true,
@@ -40,5 +44,9 @@ router.post('/listings/:listingId/buy', protect, buyNFT);
 router.post('/auctions/:listingId/complete', protect, completeAuction);
 router.delete('/listings/:listingId', protect, cancelListing);
 router.get('/users/me/listings', protect, getMyListings);
+
+// Transaction history routes
+router.get('/history', protect, getMarketplaceHistory);
+router.get('/history/:transactionId', protect, getTransaction);
 
 export default router;

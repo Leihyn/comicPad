@@ -247,16 +247,22 @@ class HederaService {
 
     try {
       logger.info(`Transferring NFT ${tokenId}/${serialNumber} from ${fromAccountId} to ${toAccountId} using operator allowance`);
+      logger.info(`Marketplace operator ID: ${this.operatorId.toString()}`);
 
       const token = TokenId.fromString(tokenId);
       const sender = AccountId.fromString(fromAccountId);
       const receiver = AccountId.fromString(toAccountId);
 
+      logger.info(`Parsed accounts - Sender: ${sender.toString()}, Receiver: ${receiver.toString()}, Token: ${token.toString()}`);
+
       // Create transfer transaction using APPROVED transfer
       // The operator (marketplace) was pre-approved by seller when listing
       // Only the operator needs to sign this transaction
       const transaction = new TransferTransaction()
-        .addApprovedNftTransfer(token, serialNumber, sender, receiver);
+        .addApprovedNftTransfer(token, serialNumber, sender, receiver)
+        .setTransactionValidDuration(180); // 3 minutes valid duration
+
+      logger.info('Transaction created with approved NFT transfer');
 
       // NOTE: We're NOT adding HBAR payment in the same transaction
       // because that would require buyer's signature which we don't have on backend
@@ -266,14 +272,12 @@ class HederaService {
       // 3. Then transfer NFT using operator allowance
       // OR use an escrow smart contract
 
-      // Freeze transaction with client first
-      const frozenTx = await transaction.freezeWith(this.client);
+      logger.info('Freezing and executing approved NFT transfer...');
 
-      // Sign with operator key (marketplace has been approved to move the NFT)
-      const signedTx = await frozenTx.sign(this.operatorKey);
-
-      // Execute transaction with client operator
-      const txResponse = await signedTx.execute(this.client);
+      // Freeze and execute the transaction with the client
+      // The client is already configured with the operator account and key
+      // so it will automatically sign with the operator's signature
+      const txResponse = await transaction.freezeWith(this.client).execute(this.client);
       const receipt = await txResponse.getReceipt(this.client);
 
       logger.info(`NFT transferred successfully using allowance: ${txResponse.transactionId.toString()}`);

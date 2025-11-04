@@ -4,6 +4,7 @@ import {
   AccountId,
   ContractExecuteTransaction,
   ContractId,
+  Hbar,
   LedgerId,
   NftId,
   TokenAssociateTransaction,
@@ -360,26 +361,115 @@ class HashPackWallet {
   }
 
   async transferHBAR(toAddress, amount, memo = '') {
-    console.log('💸 Transferring HBAR:', {
-      to: toAddress,
-      amount,
-      memo
-    });
+    try {
+      console.log('💸 Transferring HBAR:', {
+        to: toAddress,
+        amount,
+        memo,
+        fromAccount: this.getAccountId().toString()
+      });
 
-    const transfer = new TransferTransaction()
-      .addHbarTransfer(this.getAccountId(), new Hbar(-amount))
-      .addHbarTransfer(typeof toAddress === 'string' ? AccountId.fromString(toAddress) : toAddress, new Hbar(amount));
+      const connector = getDAppConnector();
+      console.log('🔍 Connector state:', {
+        hasConnector: !!connector,
+        signersCount: connector?.signers?.length || 0,
+        accountId: connector?.signers?.[0]?.getAccountId()?.toString()
+      });
 
-    if (memo) {
-      transfer.setTransactionMemo(memo);
+      const transfer = new TransferTransaction()
+        .addHbarTransfer(this.getAccountId(), new Hbar(-amount))
+        .addHbarTransfer(typeof toAddress === 'string' ? AccountId.fromString(toAddress) : toAddress, new Hbar(amount))
+        .setTransactionValidDuration(180); // 3 minutes valid duration
+
+      if (memo) {
+        transfer.setTransactionMemo(memo);
+      }
+
+      const signer = this.getSigner();
+
+      console.log('⏳ Freezing transaction with signer...');
+      console.log('   Signer type:', signer.constructor.name);
+
+      // Focus the window to ensure popup appears
+      if (typeof window !== 'undefined') {
+        window.focus();
+      }
+
+      await transfer.freezeWithSigner(signer);
+
+      console.log('📝 Executing transaction - APPROVE IN HASHPACK NOW!');
+      console.log('   ⚠️ IMPORTANT: Look for HashPack popup/notification!');
+      console.log('   If you don\'t see it, click the HashPack extension icon in your browser toolbar');
+
+      // Show alert to user to check HashPack
+      if (typeof window !== 'undefined') {
+        // Create a visible notification overlay
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 20px 30px;
+          border-radius: 12px;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+          z-index: 10000;
+          font-family: system-ui, -apple-system, sans-serif;
+          font-size: 16px;
+          font-weight: 600;
+          animation: slideDown 0.3s ease-out;
+        `;
+        notification.innerHTML = '🔔 Please approve the transaction in your HashPack wallet';
+        document.body.appendChild(notification);
+
+        // Add timeout to prevent hanging (3 minutes to match transaction valid duration)
+        const txResult = await Promise.race([
+          transfer.executeWithSigner(signer),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('HBAR transfer timed out after 3 minutes. Please check your HashPack wallet.')), 180000)
+          )
+        ]).finally(() => {
+          // Remove notification
+          if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+          }
+        });
+
+        console.log('✅ HBAR transfer successful:', txResult.transactionId.toString());
+        return txResult;
+      } else {
+        // No window (server-side), just execute
+        const txResult = await Promise.race([
+          transfer.executeWithSigner(signer),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('HBAR transfer timed out after 3 minutes.')), 180000)
+          )
+        ]);
+
+        console.log('✅ HBAR transfer successful:', txResult.transactionId.toString());
+        return txResult;
+      }
+    } catch (error) {
+      console.error('❌ HBAR transfer error:', error);
+      console.error('   Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+
+      // Provide user-friendly error messages
+      if (error.message?.includes('timeout') || error.message?.includes('timed out')) {
+        throw new Error('Transaction timed out. Please make sure:\n1. HashPack extension is installed and unlocked\n2. You clicked "Approve" in the HashPack popup\n3. Try clicking the HashPack extension icon manually');
+      } else if (error.message?.includes('rejected') || error.message?.includes('User rejected')) {
+        throw new Error('Transaction rejected in HashPack wallet.');
+      } else if (error.message?.includes('INSUFFICIENT_ACCOUNT_BALANCE')) {
+        throw new Error('Insufficient HBAR balance in your wallet.');
+      }
+
+      throw error;
     }
-
-    const signer = this.getSigner();
-    await transfer.freezeWithSigner(signer);
-    const txResult = await transfer.executeWithSigner(signer);
-
-    console.log('✅ HBAR transfer successful:', txResult.transactionId.toString());
-    return txResult;
   }
 
   async transferFungibleToken(toAddress, tokenId, amount) {
@@ -445,16 +535,41 @@ class HashPackWallet {
       const nftId = new NftId(tokenId, serialNumber);
 
       const approvalTx = new AccountAllowanceApproveTransaction()
-        .approveTokenNftAllowance(nftId, ownerAccountId, spender);
+        .approveTokenNftAllowance(nftId, ownerAccountId, spender)
+        .setTransactionValidDuration(180); // 3 minutes valid duration
 
       const signer = this.getSigner();
+
+      console.log('⏳ Freezing NFT approval transaction...');
       await approvalTx.freezeWithSigner(signer);
-      const result = await approvalTx.executeWithSigner(signer);
+
+      console.log('📝 Requesting approval signature from HashPack...');
+      console.log('   Please approve the NFT allowance in your HashPack wallet');
+
+      // Add timeout to prevent hanging (3 minutes)
+      const result = await Promise.race([
+        approvalTx.executeWithSigner(signer),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('NFT approval timed out after 3 minutes. Please check your HashPack wallet.')), 180000)
+        )
+      ]);
 
       console.log('✅ NFT allowance approved:', result.transactionId.toString());
       return result.transactionId;
     } catch (error) {
       console.error('❌ NFT approval failed:', error);
+      console.error('   Error details:', {
+        message: error.message,
+        stack: error.stack
+      });
+
+      // Provide user-friendly error messages
+      if (error.message?.includes('timeout') || error.message?.includes('timed out')) {
+        throw new Error('NFT approval timed out. Please make sure HashPack is unlocked and try again.');
+      } else if (error.message?.includes('rejected')) {
+        throw new Error('NFT approval rejected in HashPack.');
+      }
+
       throw error;
     }
   }

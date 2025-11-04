@@ -118,25 +118,35 @@ export default function MarketplaceEnhanced() {
       }
 
       const price = selectedListing.price?.amount || 0;
-      const sellerAccountId = selectedListing.sellerAccountId;
+      const sellerAccountId = AccountId.fromString(selectedListing.sellerAccountId);
+      const tokenId = TokenId.fromString(selectedListing.tokenId);
+      const serialNumber = selectedListing.serialNumber;
 
-      toast.loading('Step 1/2: Sending payment...', { id: 'buy-nft' });
-
-      // Step 1: Buyer sends HBAR payment to seller
-      console.log('💰 Sending', price, 'HBAR to seller:', sellerAccountId);
-      const paymentResult = await hashPackWallet.transferHBAR(
-        sellerAccountId,
+      console.log('🛒 Starting atomic purchase transaction:', {
         price,
-        'NFT Purchase Payment'
+        seller: sellerAccountId.toString(),
+        tokenId: tokenId.toString(),
+        serialNumber
+      });
+
+      toast.loading('Processing purchase... (Payment + NFT Transfer)', { id: 'buy-nft' });
+
+      // Execute atomic transaction: Payment + NFT Transfer in ONE transaction
+      // This uses the seller's allowance that was granted when they listed the NFT
+      const txResult = await hashPackWallet.transferNFT(
+        sellerAccountId,
+        tokenId,
+        serialNumber,
+        Hbar.from(price)
       );
 
-      console.log('✅ Payment sent:', paymentResult);
+      console.log('✅ Atomic transaction completed:', txResult);
 
-      toast.loading('Step 2/2: Transferring NFT...', { id: 'buy-nft' });
+      toast.loading('Updating marketplace records...', { id: 'buy-nft' });
 
-      // Step 2: Call backend to execute the NFT transfer with marketplace operator signature
+      // Step 2: Call backend to update the database
       const result = await marketplaceService.buyNFT(selectedListing._id, {
-        paymentTransactionId: paymentResult.transactionId.toString()
+        paymentTransactionId: txResult.toString()
       });
 
       console.log('✅ Purchase completed:', result);
@@ -155,8 +165,10 @@ export default function MarketplaceEnhanced() {
       }, 2000);
     } catch (error) {
       console.error('Buy NFT error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to buy NFT';
-      toast.error(errorMessage, { id: 'buy-nft' });
+      toast.error(`Failed to buy NFT: ${errorMessage}`, { id: 'buy-nft', duration: 8000 });
     }
   };
 
@@ -212,6 +224,17 @@ export default function MarketplaceEnhanced() {
             <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto font-bold">
               Your favorite comics as NFTs! Buy instantly or bid in live auctions!
             </p>
+
+            {/* History Link */}
+            <div className="mt-6">
+              <Link
+                to="/marketplace/history"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur border-2 border-white/30 text-white font-semibold rounded-xl transition-all"
+              >
+                <Clock className="w-5 h-5" />
+                View Transaction History
+              </Link>
+            </div>
           </div>
         </div>
 

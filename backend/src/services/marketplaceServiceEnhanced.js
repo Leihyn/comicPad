@@ -198,11 +198,15 @@ class MarketplaceServiceEnhanced {
    * Handles transfer, royalty calculation, and distribution
    */
   async buyNFT(purchaseData) {
+    const { MarketplaceTransaction } = await import('../models/index.js');
+    let transaction = null;
+
     try {
       const {
         listingId,
         buyerId,
-        buyerAccountId
+        buyerAccountId,
+        paymentTransactionId
       } = purchaseData;
 
       logger.info(`Processing purchase for listing ${listingId}`);
@@ -231,17 +235,56 @@ class MarketplaceServiceEnhanced {
       const platformFee = salePrice * (platformFeePercent / 100);
       const royaltyFee = salePrice * (comic.royaltyPercentage / 100);
       const sellerAmount = salePrice - platformFee - royaltyFee;
+      const totalFees = platformFee + royaltyFee;
 
       logger.info(`Sale breakdown: Price=${salePrice}, Platform=${platformFee}, Royalty=${royaltyFee}, Seller=${sellerAmount}`);
 
-      // Transfer NFT on Hedera
-      const transferResult = await hederaService.transferNFT({
-        tokenId: listing.tokenId,
-        serialNumber: listing.serialNumber,
-        fromAccountId: listing.sellerAccountId,
-        toAccountId: buyerAccountId,
-        price: salePrice
+      // Create transaction record
+      transaction = new MarketplaceTransaction({
+        type: 'purchase',
+        status: 'pending',
+        buyer: {
+          userId: buyerId,
+          accountId: buyerAccountId
+        },
+        seller: {
+          userId: listing.seller,
+          accountId: listing.sellerAccountId
+        },
+        nft: {
+          tokenId: listing.tokenId,
+          serialNumber: listing.serialNumber,
+          comicId: listing.comic._id,
+          episodeId: listing.episode._id
+        },
+        listingId: listing._id,
+        price: {
+          amount: salePrice,
+          currency: 'HBAR'
+        },
+        fees: {
+          platformFee,
+          royaltyFee,
+          totalFees
+        },
+        hederaTransaction: {
+          transactionId: paymentTransactionId
+        }
       });
+
+      await transaction.save();
+      logger.info(`Created transaction record: ${transaction._id}`);
+
+      // NOTE: NFT transfer is now handled by the buyer in the frontend as an atomic transaction
+      // The buyer executes: Payment to seller + NFT transfer using seller's allowance
+      // This is more secure and atomic - either both succeed or both fail
+      logger.info('NFT transfer was executed by buyer in atomic transaction on frontend');
+
+      const transferResult = {
+        transactionId: paymentTransactionId || 'unknown',
+        status: 'SUCCESS',
+        explorerUrl: `https://hashscan.io/testnet/transaction/${paymentTransactionId}`
+      };
 
       // Update episode NFT ownership
       const episode = listing.episode;
@@ -262,6 +305,12 @@ class MarketplaceServiceEnhanced {
         transferResult.explorerUrl
       );
 
+      // Mark transaction as completed
+      await transaction.markCompleted({
+        transactionId: transferResult.transactionId,
+        explorerUrl: transferResult.explorerUrl
+      });
+
       // Distribute payments would happen here
       // In production, you'd execute actual HBAR transfers
 
@@ -270,6 +319,7 @@ class MarketplaceServiceEnhanced {
       return {
         listing,
         transfer: transferResult,
+        transaction: transaction.toObject(),
         breakdown: {
           salePrice,
           platformFee,
@@ -279,6 +329,16 @@ class MarketplaceServiceEnhanced {
       };
     } catch (error) {
       logger.error('Error buying NFT:', error);
+
+      // Mark transaction as failed if it was created
+      if (transaction) {
+        await transaction.markFailed({
+          code: error.code || 'PURCHASE_FAILED',
+          message: error.message,
+          details: error
+        });
+      }
+
       throw new Error(`Failed to buy NFT: ${error.message}`);
     }
   }

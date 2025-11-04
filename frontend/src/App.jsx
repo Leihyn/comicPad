@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import TestHome from './pages/TestHome';
 import Explore from './pages/Explore';
 import Marketplace from './pages/MarketplaceEnhanced';
+import MarketplaceHistory from './pages/MarketplaceHistory';
 import ComicDetail from './pages/ComicDetailEnhanced';
 import EnhancedReader from './pages/EnhancedReader';
 import Collection from './pages/Collection';
@@ -167,6 +168,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/marketplace/history" element={<MarketplaceHistory />} />
           <Route path="/comic/:id" element={<ComicDetail />} />
           <Route path="/reader/:id" element={<EnhancedReader />} />
           <Route path="/collection" element={<Collection />} />
