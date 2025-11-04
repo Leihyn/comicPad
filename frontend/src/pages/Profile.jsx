@@ -69,15 +69,22 @@ export default function Profile() {
 
       console.log('📡 Fetching user profile with token...');
       // Fetch user profile
+      let userData = null;
       try {
         const userResponse = await axios.get(`${API_BASE}/users/me`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         console.log('✅ User profile loaded:', userResponse.data);
-        setUser(userResponse.data?.data?.user || userResponse.data?.user || userResponse.data);
+        userData = userResponse.data?.data?.user || userResponse.data?.user || userResponse.data;
+        setUser(userData);
       } catch (err) {
         console.error('❌ Failed to load user profile:', err);
         throw err;
+      }
+
+      // Ensure we have user data before continuing
+      if (!userData) {
+        throw new Error('Failed to load user data');
       }
 
       // Fetch created comics (creator's comics)
@@ -122,7 +129,12 @@ export default function Profile() {
       // Fetch active marketplace listings
       try {
         console.log('📡 Fetching active listings...');
-        const listingsData = await marketplaceService.getListings({ seller: user._id, status: 'active' });
+        const response = await axios.get(`${API_BASE}/marketplace/users/me/listings`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { status: 'active' }
+        });
+        console.log('✅ Active listings response:', response.data);
+        const listingsData = response.data?.data || [];
         console.log('✅ Active listings loaded:', listingsData);
         setActiveListings(Array.isArray(listingsData) ? listingsData : []);
       } catch (err) {
@@ -148,8 +160,8 @@ export default function Profile() {
   };
 
   const handleComicClick = (comic, event) => {
-    // If published and minted, open reader directly
-    if (comic.status === 'published' && comic.minted > 0) {
+    // If ready/published and minted, open reader directly
+    if ((comic.status === 'published' || comic.status === 'ready') && comic.minted > 0) {
       navigate(`/reader/${comic._id}`);
     } else {
       // For pending/unminted comics, show action modal
@@ -435,7 +447,7 @@ export default function Profile() {
                               </div>
                               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                                 <span className="px-6 py-2 bg-purple-500 text-white rounded-lg font-bold">
-                                  {comic.status === 'published' && comic.minted > 0 ? (
+                                  {((comic.status === 'published' || comic.status === 'ready') && comic.minted > 0) ? (
                                     <>
                                       <BookOpen className="w-4 h-4 inline mr-2" />
                                       Read Comic
@@ -561,7 +573,7 @@ export default function Profile() {
                         </div>
                         <div className="mt-4 pt-4 border-t border-purple-500/20">
                           <a
-                            href={`https://hashscan.io/testnet/token/${collection.tokenId}`}
+                            href={`https://hashscan.io/testnet/token/${collection.collectionTokenId || collection.tokenId}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
@@ -594,49 +606,65 @@ export default function Profile() {
               <div>
                 {activeListings.length > 0 ? (
                   <div className="space-y-4">
-                    {activeListings.map((listing) => (
-                      <div
-                        key={listing._id}
-                        className="bg-gray-700/50 rounded-lg p-6 border-2 border-purple-500/30 hover:border-purple-500 transition flex items-center gap-6"
-                      >
-                        <img
-                          src={listing.comic?.content?.coverImage}
-                          alt={listing.comic?.title}
-                          className="w-24 h-36 object-cover rounded-lg"
-                        />
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold text-white mb-2">{listing.comic?.title}</h3>
-                          <div className="flex items-center gap-4 text-sm mb-3">
-                            <span className="px-3 py-1 bg-purple-500/30 text-purple-300 rounded-full font-bold">
-                              {listing.listingType === 'fixed-price' ? '💳 Fixed Price' : '🔨 Auction'}
-                            </span>
-                            <span className="text-gray-400">Serial #{listing.serialNumber}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="text-sm text-gray-400">
-                                {listing.listingType === 'auction' ? 'Current Bid' : 'Price'}
-                              </div>
-                              <div className="text-2xl font-bold text-green-400">
-                                {listing.listingType === 'auction' ? listing.auction?.currentBid || 0 : listing.price} HBAR
-                              </div>
-                              {listing.listingType === 'auction' && (
-                                <div className="text-xs text-gray-500 mt-1">
-                                  {listing.auction?.bids?.length || 0} bids
-                                </div>
-                              )}
+                    {activeListings.map((listing) => {
+                      // Get cover image from episode or comic or metadata
+                      const coverImage = listing.episode?.content?.coverImage ||
+                                       listing.comic?.content?.coverImage ||
+                                       listing.metadata?.imageUrl ||
+                                       '/placeholder.jpg';
+
+                      // Get title from episode or comic or metadata
+                      const title = listing.episode?.title ||
+                                   listing.comic?.title ||
+                                   listing.metadata?.title ||
+                                   'Untitled';
+
+                      return (
+                        <div
+                          key={listing._id}
+                          className="bg-gray-700/50 rounded-lg p-6 border-2 border-purple-500/30 hover:border-purple-500 transition flex items-center gap-6"
+                        >
+                          <img
+                            src={coverImage}
+                            alt={title}
+                            className="w-24 h-36 object-cover rounded-lg"
+                          />
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
+                            <div className="flex items-center gap-4 text-sm mb-3">
+                              <span className="px-3 py-1 bg-purple-500/30 text-purple-300 rounded-full font-bold">
+                                {listing.listingType === 'fixed-price' ? '💳 Fixed Price' : '🔨 Auction'}
+                              </span>
+                              <span className="text-gray-400">Serial #{listing.serialNumber}</span>
                             </div>
-                            <button
-                              onClick={() => handleCancelListing(listing._id)}
-                              className="px-6 py-3 bg-red-500/20 border-2 border-red-500 text-red-400 rounded-lg font-bold hover:bg-red-500/30 transition flex items-center gap-2"
-                            >
-                              <XIcon className="w-5 h-5" />
-                              Cancel Listing
-                            </button>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="text-sm text-gray-400">
+                                  {listing.listingType === 'auction' ? 'Current Bid' : 'Price'}
+                                </div>
+                                <div className="text-2xl font-bold text-green-400">
+                                  {listing.listingType === 'auction'
+                                    ? (listing.auction?.currentBid || 0)
+                                    : (listing.price?.amount || listing.price || 0)} HBAR
+                                </div>
+                                {listing.listingType === 'auction' && (
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    {listing.auction?.bids?.length || 0} bids
+                                  </div>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => handleCancelListing(listing._id)}
+                                className="px-6 py-3 bg-red-500/20 border-2 border-red-500 text-red-400 rounded-lg font-bold hover:bg-red-500/30 transition flex items-center gap-2"
+                              >
+                                <XIcon className="w-5 h-5" />
+                                Unlist
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-12">

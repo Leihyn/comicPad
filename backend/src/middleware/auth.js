@@ -119,7 +119,7 @@ export const requireWallet = async (req, res, next) => {
       });
     }
 
-    if (!req.user.hederaAccount || !req.user.hederaAccount.accountId) {
+    if (!req.user.wallet || !req.user.wallet.accountId) {
       return res.status(403).json({
         success: false,
         message: 'Please connect your Hedera wallet first'

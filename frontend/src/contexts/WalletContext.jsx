@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { HashConnect } from 'hashconnect';
+import authService from '../services/authService';
+import { useAuth } from './AuthContext';
 
 const WalletContext = createContext();
 
@@ -17,6 +19,7 @@ export const WalletProvider = ({ children }) => {
   const [wallet, setWallet] = useState(null);
   const hashconnectRef = useRef(null);
   const [pairingData, setPairingData] = useState(null);
+  const { isAuthenticated, updateUser } = useAuth();
 
   // Initialize HashConnect
   useEffect(() => {
@@ -134,6 +137,21 @@ export const WalletProvider = ({ children }) => {
       localStorage.setItem('wallet', JSON.stringify(walletData));
       localStorage.setItem('hashconnect_pairing', JSON.stringify(pairing));
 
+      // Save wallet to backend if user is authenticated
+      if (isAuthenticated) {
+        try {
+          const response = await authService.connectWallet(accountId);
+          if (response.success) {
+            updateUser(response.data.user);
+            console.log('Wallet saved to backend:', response);
+          }
+        } catch (backendError) {
+          console.error('Failed to save wallet to backend:', backendError);
+          // Don't fail the whole connection if backend save fails
+          toast.warning('Wallet connected locally, but failed to sync with server');
+        }
+      }
+
       toast.success(`Connected to ${accountId}`);
       return walletData;
     } catch (error) {
@@ -163,6 +181,15 @@ export const WalletProvider = ({ children }) => {
 
       if (hashconnect && pairingData?.topic) {
         await hashconnect.disconnect(pairingData.topic);
+      }
+
+      // Disconnect from backend if user is authenticated
+      if (isAuthenticated) {
+        try {
+          await authService.disconnectWallet();
+        } catch (backendError) {
+          console.error('Failed to disconnect wallet from backend:', backendError);
+        }
       }
 
       setWallet(null);

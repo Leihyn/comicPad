@@ -102,7 +102,8 @@ export default function Marketplace() {
         return;
       }
 
-      if (!selectedListing.comic?.collection?.tokenId && !selectedListing.comic?.tokenId) {
+      const tokenIdString = selectedListing.tokenId;
+      if (!tokenIdString) {
         toast.error('Invalid listing: missing token ID', { id: 'buy-nft' });
         console.error('Listing missing tokenId:', selectedListing);
         return;
@@ -111,12 +112,13 @@ export default function Marketplace() {
       toast.loading('Preparing purchase transaction...', { id: 'buy-nft' });
 
       // Get listing details
-      const tokenIdString = selectedListing.comic?.collection?.tokenId || selectedListing.comic?.tokenId;
       const sellerAccountId = AccountId.fromString(selectedListing.sellerAccountId);
       const tokenId = TokenId.fromString(tokenIdString);
       const serialNumber = selectedListing.serialNumber;
       // Ensure price is a valid integer for Hbar
-      const priceValue = Math.floor(parseFloat(selectedListing.price));
+      const priceValue = typeof selectedListing.price === 'object'
+        ? Math.floor(parseFloat(selectedListing.price.amount))
+        : Math.floor(parseFloat(selectedListing.price));
       const price = new Hbar(priceValue);
 
       console.log('💰 Purchasing NFT:', {
@@ -314,17 +316,21 @@ export default function Marketplace() {
             <div className="p-6">
               <div className="flex gap-4 mb-4">
                 <img
-                  src={selectedListing.comic?.content?.coverImage}
-                  alt={selectedListing.comic?.title}
+                  src={selectedListing.metadata?.imageUrl || selectedListing.episode?.content?.coverImage?.url || selectedListing.comic?.content?.coverImage}
+                  alt={selectedListing.metadata?.title || selectedListing.episode?.title || selectedListing.comic?.title}
                   className="w-32 h-48 object-cover rounded-xl flex-shrink-0"
                 />
                 <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-white mb-2">{selectedListing.comic?.title}</h3>
+                  <h3 className="text-2xl font-bold text-white mb-2">
+                    {selectedListing.metadata?.title || selectedListing.episode?.title || selectedListing.comic?.title}
+                  </h3>
                   <p className="text-gray-400 mb-4">Serial #{selectedListing.serialNumber}</p>
 
                   <div className="bg-dark-700 rounded-xl p-4">
                     <div className="text-sm text-gray-400 mb-1">PRICE</div>
-                    <div className="text-4xl font-comic text-comic-yellow">{selectedListing.price} HBAR</div>
+                    <div className="text-4xl font-comic text-comic-yellow">
+                      {typeof selectedListing.price === 'object' ? selectedListing.price.amount : selectedListing.price} HBAR
+                    </div>
                   </div>
                 </div>
               </div>
@@ -355,12 +361,14 @@ export default function Marketplace() {
             <div className="p-6">
               <div className="flex gap-4 mb-4">
                 <img
-                  src={selectedListing.comic?.content?.coverImage}
-                  alt={selectedListing.comic?.title}
+                  src={selectedListing.metadata?.imageUrl || selectedListing.episode?.content?.coverImage?.url || selectedListing.comic?.content?.coverImage}
+                  alt={selectedListing.metadata?.title || selectedListing.episode?.title || selectedListing.comic?.title}
                   className="w-32 h-48 object-cover rounded-xl flex-shrink-0"
                 />
                 <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-white mb-2">{selectedListing.comic?.title}</h3>
+                  <h3 className="text-2xl font-bold text-white mb-2">
+                    {selectedListing.metadata?.title || selectedListing.episode?.title || selectedListing.comic?.title}
+                  </h3>
                   <p className="text-gray-400 mb-4">Serial #{selectedListing.serialNumber}</p>
 
                   <div className="bg-dark-700 rounded-xl p-4">
@@ -397,13 +405,36 @@ export default function Marketplace() {
 }
 
 function ListingCard({ listing, isConnected, onBuy, onBid }) {
+  // Extract image URL from various possible locations
+  const imageUrl = listing.metadata?.imageUrl ||
+                   listing.episode?.content?.coverImage?.url ||
+                   listing.episode?.content?.coverImage?.ipfsHash ||
+                   listing.comic?.content?.coverImage?.url ||
+                   listing.comic?.content?.coverImage ||
+                   'https://via.placeholder.com/400x600/1a1a1a/0066FF?text=COMIC';
+
+  // Extract title from various possible locations
+  const title = listing.metadata?.title || listing.episode?.title || listing.comic?.title || 'Untitled Comic';
+
+  // Extract price - can be either listing.price or listing.price.amount
+  const price = typeof listing.price === 'object' ? listing.price.amount : listing.price;
+
+  console.log('🎨 Rendering listing card:', {
+    id: listing._id,
+    title,
+    price,
+    imageUrl,
+    listingType: listing.listingType,
+    rawListing: listing
+  });
+
   return (
     <div className="comic-card group">
       {/* Cover Image */}
       <div className="aspect-[2/3] relative overflow-hidden bg-gradient-to-br from-comic-blue/30 to-comic-purple/30">
         <img
-          src={listing.comic?.content?.coverImage || 'https://via.placeholder.com/400x600/1a1a1a/0066FF?text=COMIC'}
-          alt={listing.comic?.title}
+          src={imageUrl}
+          alt={title}
           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
         />
         
@@ -431,7 +462,7 @@ function ListingCard({ listing, isConnected, onBuy, onBid }) {
                 {listing.listingType === 'auction' ? 'Current Bid' : 'Price'}
               </div>
               <div className="text-3xl font-comic text-comic-yellow">
-                {listing.price} HBAR
+                {price} HBAR
               </div>
             </div>
             {listing.listingType === 'auction' && (
@@ -442,14 +473,14 @@ function ListingCard({ listing, isConnected, onBuy, onBid }) {
           </div>
         </div>
       </div>
-      
+
       {/* Listing Info */}
       <div className="p-4 bg-dark-800">
         <h3 className="font-bold text-lg mb-1 text-white group-hover:text-comic-yellow transition truncate">
-          {listing.comic?.title}
+          {title}
         </h3>
         <p className="text-sm text-gray-400 mb-3">
-          by {listing.seller?.username || 'Unknown'}
+          by {listing.seller?.username || listing.seller?.profile?.displayName || 'Unknown'}
         </p>
         
         {/* Action Button */}

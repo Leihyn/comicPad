@@ -89,19 +89,45 @@ export const walletLogin = asyncHandler(async (req, res) => {
     });
   }
 
-  // Find or create user with this wallet
-  let user = await User.findOne({ 'hederaAccount.accountId': accountId });
+  // Find user with this wallet (check both new and old field names)
+  let user = await User.findOne({
+    $or: [
+      { 'wallet.accountId': accountId },
+      { 'hederaAccount.accountId': accountId } // Backward compatibility
+    ]
+  });
 
-  if (!user) {
+  if (user) {
+    // Migrate old hederaAccount field to wallet field if needed
+    if (user.hederaAccount && user.hederaAccount.accountId && !user.wallet?.accountId) {
+      // Use findByIdAndUpdate to properly migrate and unset old field
+      user = await User.findByIdAndUpdate(
+        user._id,
+        {
+          $set: {
+            wallet: {
+              accountId: user.hederaAccount.accountId,
+              publicKey: user.hederaAccount.publicKey,
+              connected: true,
+              connectedAt: user.hederaAccount.connectedAt || new Date()
+            }
+          },
+          $unset: { hederaAccount: 1 }
+        },
+        { new: true }
+      );
+      logger.info(`Migrated hederaAccount to wallet for user: ${accountId}`);
+    }
+  } else {
     // Auto-create user with wallet
     const username = `user_${accountId.replace(/\./g, '_')}`;
     user = await User.create({
       username,
       email: `${accountId.replace(/\./g, '_')}@wallet.local`, // Dummy email
       password: Math.random().toString(36).slice(-16), // Random password
-      hederaAccount: {
+      wallet: {
         accountId,
-        isVerified: true,
+        connected: true,
         connectedAt: new Date()
       },
       isCreator: true // Auto-grant creator status
@@ -121,7 +147,7 @@ export const walletLogin = asyncHandler(async (req, res) => {
         id: user._id,
         username: user.username,
         isCreator: user.isCreator,
-        hederaAccount: user.hederaAccount
+        wallet: user.wallet
       },
       token,
       refreshToken

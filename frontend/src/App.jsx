@@ -8,9 +8,9 @@ import { openHashPackModal, hashPackWallet } from './services/wallets/hashpackCl
 import Home from './pages/Home';
 import TestHome from './pages/TestHome';
 import Explore from './pages/Explore';
-import Marketplace from './pages/Marketplace';
+import Marketplace from './pages/MarketplaceEnhanced';
 import ComicDetail from './pages/ComicDetailEnhanced';
-import Reader from './pages/Reader';
+import EnhancedReader from './pages/EnhancedReader';
 import Collection from './pages/Collection';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
@@ -168,7 +168,7 @@ function App() {
           <Route path="/explore" element={<Explore />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/comic/:id" element={<ComicDetail />} />
-          <Route path="/reader/:id" element={<Reader />} />
+          <Route path="/reader/:id" element={<EnhancedReader />} />
           <Route path="/collection" element={<Collection />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />

@@ -1,9 +1,11 @@
 import { useCallback, useContext, useEffect } from 'react';
 import {
+  AccountAllowanceApproveTransaction,
   AccountId,
   ContractExecuteTransaction,
   ContractId,
   LedgerId,
+  NftId,
   TokenAssociateTransaction,
   TokenId,
   TransferTransaction,
@@ -173,55 +175,83 @@ export const connectHashPackExtension = async () => {
 // Open HashPack connection modal
 export const openHashPackModal = async () => {
   try {
+    console.log('🔵 ========== WALLET CONNECTION START ==========');
     console.log('🔵 Step 1: Clearing expired proposals...');
     clearExpiredProposals();
 
-    console.log('🔵 Step 2: Initializing WalletConnect...');
+    console.log('🔵 Step 2: Checking environment...');
+    console.log('   - Window object available:', typeof window !== 'undefined');
+    console.log('   - HashPack extension:', isHashPackExtensionAvailable());
+    console.log('   - WalletConnect project ID:', walletConnectProjectId);
+
+    console.log('🔵 Step 3: Initializing WalletConnect...');
     toast.loading('Initializing wallet connection...', { id: 'wallet-connect' });
 
-    await initializeWalletConnect();
-    console.log('✅ Step 3: WalletConnect initialized');
+    try {
+      await initializeWalletConnect();
+      console.log('✅ WalletConnect initialized successfully');
+    } catch (initError) {
+      console.error('❌ WalletConnect initialization failed:', initError);
+      toast.error('Failed to initialize wallet. Please refresh the page.', { id: 'wallet-connect' });
+      throw new Error(`Initialization failed: ${initError.message}`);
+    }
 
     const connector = getDAppConnector();
     if (!connector) {
       console.error('❌ Connector not available after init');
+      toast.error('Wallet connector unavailable. Please refresh the page.', { id: 'wallet-connect' });
       throw new Error('WalletConnect connector not available');
     }
+    console.log('✅ Connector available');
 
     // Check if already connected
     if (connector.signers && connector.signers.length > 0) {
-      console.log('✅ Already connected to wallet');
-      toast.success('Wallet already connected!', { id: 'wallet-connect' });
+      const accountId = connector.signers[0]?.getAccountId()?.toString();
+      console.log('✅ Already connected to wallet:', accountId);
+      toast.success(`Already connected: ${accountId}`, { id: 'wallet-connect' });
       refreshEvent.emit("sync");
       return;
     }
 
-    console.log('✅ Step 4: Connector ready, opening modal...');
+    console.log('✅ Step 4: Connector ready, attempting connection...');
 
     // Check if HashPack extension is available
     const hasExtension = isHashPackExtensionAvailable();
-    console.log('🔍 HashPack extension available:', hasExtension);
+    console.log('🔍 HashPack extension check:', {
+      available: hasExtension,
+      windowHashpack: typeof window?.hashpack,
+      connectorMethods: typeof connector.connectExtension
+    });
 
     // If extension is available, try direct connection first
-    if (hasExtension) {
+    if (hasExtension && typeof connector.connectExtension === 'function') {
       try {
-        console.log('🔵 Trying direct extension connection...');
+        console.log('🔵 Attempting direct extension connection...');
         toast.loading('Connecting to HashPack extension...', { id: 'wallet-connect' });
 
-        if (typeof connector.connectExtension === 'function') {
-          const session = await connector.connectExtension('hashpack');
-          console.log('✅ Connected via extension!');
-          toast.success('Wallet connected!', { id: 'wallet-connect' });
-          refreshEvent.emit("sync");
-          return session;
-        }
+        const session = await connector.connectExtension('hashpack');
+        console.log('✅ Connected via extension!', session);
+
+        const accountId = connector.signers[0]?.getAccountId()?.toString();
+        toast.success(`Connected: ${accountId}`, { id: 'wallet-connect' });
+        refreshEvent.emit("sync");
+        return session;
       } catch (extError) {
-        console.warn('Extension connection failed, falling back to modal:', extError);
+        console.warn('⚠️ Extension connection failed:', extError.message);
+        console.log('🔄 Falling back to QR code modal...');
       }
+    } else if (!hasExtension) {
+      console.log('ℹ️ HashPack extension not found - will use QR code');
+      toast('HashPack extension not found. You can scan QR code with mobile app.', {
+        id: 'wallet-connect',
+        icon: 'ℹ️',
+        duration: 3000
+      });
     }
 
-    // Fallback to modal method
-    toast.loading('Opening wallet connection modal...', { id: 'wallet-connect' });
+    // Fallback to modal method (QR code)
+    console.log('🔵 Opening WalletConnect modal (QR code)...');
+    toast.loading('Opening connection modal...', { id: 'wallet-connect' });
 
     // Suppress the deep link error by catching it
     const originalError = console.error;
@@ -234,40 +264,61 @@ export const openHashPackModal = async () => {
     };
 
     try {
-      console.log('🔵 Calling connector.openModal()...');
-      console.log('⏳ Waiting for user to connect wallet in modal...');
+      console.log('⏳ Waiting for user to scan QR code or approve connection...');
+      console.log('   Timeout: 60 seconds');
 
-      const session = await connector.openModal(undefined, false);
-      console.log('✅ Session established:', session);
+      const session = await Promise.race([
+        connector.openModal(undefined, false),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Connection timeout after 60 seconds')), 60000)
+        )
+      ]);
 
-      toast.success('Wallet connected successfully!', { id: 'wallet-connect' });
+      console.log('✅ Session established!');
+      const accountId = connector.signers[0]?.getAccountId()?.toString();
+      console.log('   Account ID:', accountId);
+
+      toast.success(`Wallet connected: ${accountId}`, { id: 'wallet-connect' });
       refreshEvent.emit("sync");
+      console.log('🔵 ========== WALLET CONNECTION SUCCESS ==========');
       return session;
     } finally {
       console.error = originalError;
     }
   } catch (error) {
-    console.error('❌ Failed to connect wallet:', error);
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    });
+    console.error('❌ ========== WALLET CONNECTION FAILED ==========');
+    console.error('Error:', error);
+    console.error('Error type:', error.constructor.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
 
-    // Handle specific error types
+    // Handle specific error types with actionable messages
     if (error.message?.includes('Proposal expired')) {
       console.log('🔄 Clearing expired sessions...');
       clearWalletConnectSessions();
-      toast.error('Connection expired. Please try again.', {
+      toast.error('Connection expired. Please refresh and try again.', {
+        id: 'wallet-connect',
+        duration: 6000
+      });
+    } else if (error.message?.includes('User rejected') || error.message?.includes('rejected')) {
+      toast.error('You rejected the connection request', {
+        id: 'wallet-connect',
+        duration: 4000
+      });
+    } else if (error.message?.includes('timeout')) {
+      toast.error('Connection timed out. Please try again.', {
         id: 'wallet-connect',
         duration: 5000
       });
-    } else if (error.message?.includes('User rejected')) {
-      toast.error('Connection rejected', { id: 'wallet-connect' });
-    } else if (error.message?.includes('WebSocket') || error.message?.includes('Failed to publish') || error.message?.includes('timeout')) {
-      console.log('🔄 Network issue detected...');
+    } else if (error.message?.includes('WebSocket') || error.message?.includes('Failed to publish')) {
+      console.log('🔄 Network issue detected, clearing sessions...');
       clearWalletConnectSessions();
-      toast.error('Connection failed. Please try again.', {
+      toast.error('Network connection failed. Check your internet and try again.', {
+        id: 'wallet-connect',
+        duration: 6000
+      });
+    } else if (error.message?.includes('Initialization failed')) {
+      toast.error('Failed to initialize. Please refresh the page.', {
         id: 'wallet-connect',
         duration: 5000
       });
@@ -277,6 +328,14 @@ export const openHashPackModal = async () => {
         duration: 5000
       });
     }
+
+    console.log('💡 Troubleshooting tips:');
+    console.log('   1. Make sure HashPack extension is installed and unlocked');
+    console.log('   2. Try refreshing the page');
+    console.log('   3. Clear browser cache and localStorage');
+    console.log('   4. Check internet connection');
+    console.log('   5. See WALLET_CONNECTION_TROUBLESHOOTING.md for more help');
+
     throw error;
   }
 };
@@ -300,15 +359,27 @@ class HashPackWallet {
     return AccountId.fromString(this.getSigner().getAccountId().toString());
   }
 
-  async transferHBAR(toAddress, amount) {
-    const transferHBARTransaction = new TransferTransaction()
-      .addHbarTransfer(this.getAccountId(), -amount)
-      .addHbarTransfer(toAddress, amount);
+  async transferHBAR(toAddress, amount, memo = '') {
+    console.log('💸 Transferring HBAR:', {
+      to: toAddress,
+      amount,
+      memo
+    });
+
+    const transfer = new TransferTransaction()
+      .addHbarTransfer(this.getAccountId(), new Hbar(-amount))
+      .addHbarTransfer(typeof toAddress === 'string' ? AccountId.fromString(toAddress) : toAddress, new Hbar(amount));
+
+    if (memo) {
+      transfer.setTransactionMemo(memo);
+    }
 
     const signer = this.getSigner();
-    await transferHBARTransaction.freezeWithSigner(signer);
-    const txResult = await transferHBARTransaction.executeWithSigner(signer);
-    return txResult ? txResult.transactionId : null;
+    await transfer.freezeWithSigner(signer);
+    const txResult = await transfer.executeWithSigner(signer);
+
+    console.log('✅ HBAR transfer successful:', txResult.transactionId.toString());
+    return txResult;
   }
 
   async transferFungibleToken(toAddress, tokenId, amount) {
@@ -325,28 +396,105 @@ class HashPackWallet {
   async transferNFT(sellerAccountId, tokenId, serialNumber, price) {
     const buyerAccountId = this.getAccountId();
 
+    console.log('🔄 transferNFT called with:', {
+      sellerAccountId: sellerAccountId.toString(),
+      tokenId: tokenId.toString(),
+      serialNumber,
+      price,
+      priceType: typeof price,
+      priceToString: price.toString(),
+      priceToTinybars: price.toTinybars ? price.toTinybars().toString() : 'N/A'
+    });
+
+    // Use negated() method for proper negation of Hbar
+    const negativePrice = price.negated();
+
+    // Create transfer using approved allowance
+    // This allows buyer to complete the transaction without seller's signature
     const transferTransaction = new TransferTransaction()
       // Buyer pays HBAR to seller
-      .addHbarTransfer(buyerAccountId, -price)
+      .addHbarTransfer(buyerAccountId, negativePrice)
       .addHbarTransfer(sellerAccountId, price)
-      // Seller sends NFT to buyer
-      .addNftTransfer(tokenId, serialNumber, sellerAccountId, buyerAccountId);
+      // Transfer NFT using approved allowance (sender is seller, receiver is buyer)
+      .addApprovedNftTransfer(tokenId, serialNumber, sellerAccountId, buyerAccountId);
 
     const signer = this.getSigner();
     await transferTransaction.freezeWithSigner(signer);
     const txResult = await transferTransaction.executeWithSigner(signer);
+
+    console.log('✅ Transfer completed:', txResult.transactionId.toString());
     return txResult ? txResult.transactionId : null;
   }
 
-  async associateToken(tokenId) {
-    const associateTokenTransaction = new TokenAssociateTransaction()
-      .setAccountId(this.getAccountId())
-      .setTokenIds([tokenId]);
+  async approveNFTAllowance(tokenId, serialNumber, spenderAccountId = null) {
+    try {
+      const ownerAccountId = this.getAccountId();
+      // If no spender specified, approve to self (for marketplace delegation)
+      const spender = spenderAccountId
+        ? (typeof spenderAccountId === 'string' ? AccountId.fromString(spenderAccountId) : spenderAccountId)
+        : ownerAccountId;
 
-    const signer = this.getSigner();
-    await associateTokenTransaction.freezeWithSigner(signer);
-    const txResult = await associateTokenTransaction.executeWithSigner(signer);
-    return txResult ? txResult.transactionId : null;
+      console.log('🔐 Approving NFT allowance:', {
+        tokenId: tokenId.toString(),
+        serialNumber,
+        owner: ownerAccountId.toString(),
+        spender: spender.toString()
+      });
+
+      // Create NftId from tokenId and serialNumber
+      const nftId = new NftId(tokenId, serialNumber);
+
+      const approvalTx = new AccountAllowanceApproveTransaction()
+        .approveTokenNftAllowance(nftId, ownerAccountId, spender);
+
+      const signer = this.getSigner();
+      await approvalTx.freezeWithSigner(signer);
+      const result = await approvalTx.executeWithSigner(signer);
+
+      console.log('✅ NFT allowance approved:', result.transactionId.toString());
+      return result.transactionId;
+    } catch (error) {
+      console.error('❌ NFT approval failed:', error);
+      throw error;
+    }
+  }
+
+  async associateToken(tokenId) {
+    try {
+      console.log('🔗 Associating token:', tokenId.toString());
+
+      const associateTokenTransaction = new TokenAssociateTransaction()
+        .setAccountId(this.getAccountId())
+        .setTokenIds([tokenId]);
+
+      const signer = this.getSigner();
+
+      console.log('⏳ Freezing transaction...');
+      await associateTokenTransaction.freezeWithSigner(signer);
+
+      console.log('📝 Requesting signature from HashPack...');
+      // Add timeout to prevent hanging
+      const txResult = await Promise.race([
+        associateTokenTransaction.executeWithSigner(signer),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Token association timed out after 60 seconds')), 60000)
+        )
+      ]);
+
+      console.log('✅ Token associated successfully!');
+      return txResult ? txResult.transactionId : null;
+    } catch (error) {
+      console.error('❌ Token association error:', error);
+
+      // Check if token is already associated
+      if (error.message?.includes('TOKEN_ALREADY_ASSOCIATED_TO_ACCOUNT') ||
+          error.message?.includes('already associated')) {
+        console.log('ℹ️ Token already associated, continuing...');
+        return null; // Not an error, token is already associated
+      }
+
+      throw error;
+    }
   }
 
   async executeContractFunction(

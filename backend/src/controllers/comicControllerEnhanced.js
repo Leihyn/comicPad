@@ -11,17 +11,34 @@ import logger from '../utils/logger.js';
 /**
  * Create new comic collection
  * POST /api/comics
+ * Supports two modes:
+ * 1. Backend creates collection (provide title, description, etc.)
+ * 2. User already created collection (provide tokenId from frontend)
  */
 export const createComic = async (req, res) => {
   try {
     const {
+      // Standard fields
       title,
+      name, // Frontend might send 'name' instead of 'title'
       description,
       series,
       genres,
       tags,
       royaltyPercentage,
-      maxSupply
+      maxSupply,
+      // User-created collection fields
+      tokenId,
+      symbol,
+      transactionId,
+      treasuryAccountId,
+      // Episode/Comic issue fields
+      collectionId,
+      genre,
+      issueNumber,
+      price,
+      supply,
+      edition
     } = req.body;
 
     const userId = req.user.id;
@@ -34,10 +51,91 @@ export const createComic = async (req, res) => {
       });
     }
 
+    // Use 'name' if 'title' not provided (frontend compatibility)
+    const comicTitle = title || name;
+
+    if (!comicTitle) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title or name is required'
+      });
+    }
+
+    // If collectionId is provided, this is creating an episode (comic issue)
+    if (collectionId) {
+      logger.info(`Creating episode for collection: ${collectionId}`);
+
+      // Auto-increment episode number by finding the last episode
+      const lastEpisode = await Episode.findOne({ comic: collectionId })
+        .sort({ episodeNumber: -1 })
+        .select('episodeNumber');
+
+      const nextEpisodeNumber = lastEpisode ? lastEpisode.episodeNumber + 1 : 1;
+      logger.info(`Next episode number for collection ${collectionId}: ${nextEpisodeNumber}`);
+
+      // Normalize field names for createEpisode handler
+      req.params.comicId = collectionId;
+      req.body.episodeNumber = nextEpisodeNumber; // Use auto-incremented number
+      req.body.mintPrice = req.body.price || 0;
+      req.body.readPrice = 0; // Free to read if you own the NFT
+      req.body.maxSupply = req.body.supply || 1;
+
+      // Redirect to createEpisode handler
+      return await createEpisode(req, res);
+    }
+
+    // Check if user already created the collection on frontend
+    if (tokenId) {
+      // User already created collection - just save to database
+      logger.info(`Saving user-created collection: ${comicTitle} (${tokenId})`);
+      logger.info(`Request body:`, JSON.stringify(req.body));
+
+      try {
+        const comic = await Comic.create({
+          title: comicTitle,
+          description: description || '',
+          series: series || '',
+          genres: genres || [],
+          tags: tags || [],
+          creator: userId,
+          creatorAccountId: treasuryAccountId || accountId,
+          collectionTokenId: tokenId,
+          royaltyPercentage: parseInt(royaltyPercentage) || 10,
+          maxSupply: parseInt(maxSupply) || 0,
+          coverImage: req.file ? {
+            ipfsHash: '',
+            url: req.file.path
+          } : null,
+          status: 'draft'
+        });
+
+        logger.info(`Collection saved successfully: ${comic._id}`);
+
+        return res.status(201).json({
+          success: true,
+          message: 'Collection saved successfully',
+          data: {
+            collection: comic,
+            tokenId,
+            explorerUrl: `https://hashscan.io/testnet/token/${tokenId}`
+          }
+        });
+      } catch (dbError) {
+        logger.error('Database error saving collection:', dbError);
+        logger.error('Validation errors:', dbError.errors);
+        return res.status(500).json({
+          success: false,
+          message: `Database error: ${dbError.message}`,
+          details: dbError.errors
+        });
+      }
+    }
+
+    // Backend creates the collection
     const result = await comicService.createComic({
       userId,
       accountId,
-      title,
+      title: comicTitle,
       description,
       series,
       genres,
@@ -162,7 +260,7 @@ export const publishEpisode = async (req, res) => {
 export const mintEpisodeNFT = async (req, res) => {
   try {
     const { episodeId } = req.params;
-    const { quantity = 1 } = req.body;
+    const { quantity = 1, serialNumbers, transactionId } = req.body;
 
     const buyerAccountId = req.user.wallet?.accountId;
 
@@ -173,6 +271,24 @@ export const mintEpisodeNFT = async (req, res) => {
       });
     }
 
+    // If serialNumbers are provided, NFTs were already minted on frontend
+    // Just record the results
+    if (serialNumbers && serialNumbers.length > 0) {
+      const result = await comicService.recordMintedNFTs({
+        episodeId,
+        buyerAccountId,
+        serialNumbers,
+        transactionId
+      });
+
+      return res.json({
+        success: true,
+        message: `Recorded ${serialNumbers.length} minted NFT(s) successfully`,
+        data: result
+      });
+    }
+
+    // Otherwise, mint on backend (legacy flow)
     const result = await comicService.mintEpisodeNFT({
       episodeId,
       buyerAccountId,
@@ -260,6 +376,7 @@ export const getComics = async (req, res) => {
     res.json({
       success: true,
       data: {
+        collections: comics, // Return as 'collections' for clarity
         comics,
         pagination: {
           total,
@@ -401,13 +518,37 @@ export const getMyComics = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const comics = await Comic.find({ creator: userId })
-      .populate('episodes')
+    // Fetch episodes (comic issues) created by user, with collection info
+    const episodes = await Episode.find({ creator: userId })
+      .populate('comic', 'title collectionTokenId')
       .sort('-createdAt');
+
+    // Transform episodes to match frontend expectations
+    const comics = episodes.map(episode => ({
+      _id: episode._id,
+      title: episode.title,
+      description: episode.description,
+      episodeNumber: episode.episodeNumber,
+      content: {
+        coverImage: episode.content?.coverImage?.url || episode.content?.coverImage?.ipfsHash,
+        metadataUri: episode.content?.metadataUri
+      },
+      price: episode.pricing?.mintPrice || 0,
+      minted: episode.stats?.totalMinted || 0,
+      supply: episode.supply?.maxSupply || 0,
+      status: episode.status,
+      collection: episode.comic, // Parent collection
+      collectionTokenId: episode.collectionTokenId,
+      creator: episode.creator?.toString() || episode.creator, // Convert ObjectId to string
+      nfts: episode.mintedNFTs || [], // Add NFTs array for modal
+      createdAt: episode.createdAt
+    }));
 
     res.json({
       success: true,
-      data: comics
+      data: {
+        comics
+      }
     });
   } catch (error) {
     logger.error('Error in getMyComics controller:', error);
@@ -439,26 +580,38 @@ export const getMyCollection = async (req, res) => {
       'mintedNFTs.owner': userAccountId
     }).populate('comic', 'title coverImage');
 
+    // Transform episodes to match frontend expectations
     const collection = episodes.map(episode => {
       const ownedNFTs = episode.mintedNFTs.filter(
         nft => nft.owner === userAccountId
       );
 
       return {
-        episode: {
-          _id: episode._id,
-          title: episode.title,
-          episodeNumber: episode.episodeNumber,
-          coverImage: episode.content.coverImage
+        _id: episode._id,
+        title: episode.title,
+        description: episode.description,
+        episodeNumber: episode.episodeNumber,
+        content: {
+          coverImage: episode.content?.coverImage?.url || episode.content?.coverImage?.ipfsHash,
+          metadataUri: episode.content?.metadataUri
         },
-        comic: episode.comic,
-        nfts: ownedNFTs
+        price: episode.pricing?.mintPrice || 0,
+        minted: episode.stats?.totalMinted || 0,
+        supply: episode.supply?.maxSupply || 0,
+        status: episode.status,
+        collection: episode.comic, // Parent collection
+        collectionTokenId: episode.collectionTokenId,
+        creator: episode.creator?.toString() || episode.creator, // Convert ObjectId to string
+        nfts: ownedNFTs, // User's owned NFTs
+        createdAt: episode.createdAt
       };
     });
 
     res.json({
       success: true,
-      data: collection
+      data: {
+        comics: collection
+      }
     });
   } catch (error) {
     logger.error('Error in getMyCollection controller:', error);

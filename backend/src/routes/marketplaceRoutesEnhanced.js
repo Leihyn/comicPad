@@ -12,6 +12,8 @@ import {
   getMyListings,
   getMarketplaceStats
 } from '../controllers/marketplaceControllerEnhanced.js';
+// Import the working createListing from old controller for backward compatibility
+import { createListing as createListingOld } from '../controllers/marketplaceController.js';
 import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -20,9 +22,18 @@ const router = express.Router();
 router.get('/listings', getListings);
 router.get('/listings/:listingId', getListing);
 router.get('/stats', getMarketplaceStats);
+router.get('/operator', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      operatorAccountId: process.env.HEDERA_OPERATOR_ID
+    }
+  });
+});
 
 // Protected routes
 router.post('/listings', protect, createListing);
+router.post('/list', protect, createListingOld); // Alias route for frontend compatibility
 router.post('/auctions', protect, createAuction);
 router.post('/auctions/:listingId/bid', protect, placeBid);
 router.post('/listings/:listingId/buy', protect, buyNFT);

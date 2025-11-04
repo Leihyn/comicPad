@@ -249,7 +249,7 @@ listingSchema.methods.cancel = async function() {
   }
 
   this.status = 'cancelled';
-  await this.save();
+  await this.save({ validateBeforeSave: false });
   return this;
 };
 
@@ -270,3 +270,4 @@ listingSchema.methods.incrementViews = async function() {
 const Listing = mongoose.model('Listing', listingSchema);
 
 export default Listing;
+

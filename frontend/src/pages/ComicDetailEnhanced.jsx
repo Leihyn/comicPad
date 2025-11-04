@@ -73,7 +73,8 @@ export default function ComicDetailEnhanced() {
       toast.loading(`Minting ${comic.supply} NFT(s)...`, { id: 'mint' });
 
       const metadataArray = Array(comic.supply).fill(comic.content.metadataUri);
-      const mintResult = await mintNFTs(comic.collection.tokenId, metadataArray);
+      const tokenId = comic.collection?.collectionTokenId || comic.collection?.tokenId;
+      const mintResult = await mintNFTs(tokenId, metadataArray);
 
       await axios.post(
         `${API_BASE}/comics/${id}/mint`,
@@ -431,7 +432,7 @@ export default function ComicDetailEnhanced() {
 
                   {comic.collection?.tokenId && (
                     <a
-                      href={`https://hashscan.io/testnet/token/${comic.collection.tokenId}`}
+                      href={`https://hashscan.io/testnet/token/${comic.collection?.collectionTokenId || comic.collection?.tokenId}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 font-bold text-lg"

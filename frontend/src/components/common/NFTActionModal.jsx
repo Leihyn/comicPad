@@ -3,6 +3,8 @@ import { X, BookOpen, ShoppingCart, Gavel, Gift, Trash2, DollarSign, Calendar } 
 import Button from './Button';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { hashPackWallet } from '../../services/wallets/hashpackClient';
+import { TokenId } from '@hashgraph/sdk';
 
 const API_BASE = 'http://localhost:3001/api/v1';
 
@@ -21,9 +23,10 @@ export default function NFTActionModal({ comic, isOpen, onClose, onSuccess }) {
   console.log('🎨 Comic creator:', comic.creator);
   console.log('📦 Comic NFTs array:', comic.nfts);
   console.log('🔢 Number of NFTs:', comic.nfts?.length || 0);
+  console.log('💾 Comic minted count:', comic.minted);
 
   const isPending = comic.status === 'pending';
-  const isPublished = comic.status === 'published';
+  const isPublished = comic.status === 'published' || comic.status === 'ready';
 
   const handleReadComic = () => {
     // Navigate to reader view
@@ -39,23 +42,55 @@ export default function NFTActionModal({ comic, isOpen, onClose, onSuccess }) {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const userString = localStorage.getItem('user');
-      const user = userString ? JSON.parse(userString) : null;
 
+      // Try multiple ways to get user data
+      let user = null;
+      const userString = localStorage.getItem('user');
+
+      if (userString) {
+        try {
+          user = JSON.parse(userString);
+        } catch (e) {
+          console.error('Failed to parse user from localStorage:', e);
+        }
+      }
+
+      // If not in localStorage, try to fetch from API
       if (!user) {
+        console.log('🔍 User not in localStorage, fetching from API...');
+        const response = await axios.get(`${API_BASE}/users/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        user = response.data?.data?.user || response.data?.user || response.data;
+        // Store for future use
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+
+      // Normalize user object - backend may return 'id' or '_id'
+      if (user && user.id && !user._id) {
+        user._id = user.id;
+      }
+
+      if (!user || !user._id) {
         toast.error('User not found. Please login again.');
+        console.error('User object:', user);
         return;
       }
 
       console.log('🔍 Checking ownership for user:', user._id);
       console.log('💳 User Hedera Account:', user.hederaAccount?.accountId);
+      console.log('💳 User Wallet Account:', user.wallet?.accountId);
       console.log('📦 Comic NFTs:', comic.nfts);
       console.log('🎨 Comic creator:', comic.creator);
+      console.log('🆔 Comic creator ID:', typeof comic.creator === 'object' ? comic.creator?._id : comic.creator);
 
       // Find an NFT owned by the current user
       // Check THREE ways: user ID, wallet address, OR creator
-      const isCreator = comic.creator?._id === user._id || comic.creator === user._id;
-      const userWallet = user.hederaAccount?.accountId;
+      const creatorId = typeof comic.creator === 'object' ? comic.creator?._id : comic.creator;
+      const isCreator = String(creatorId) === String(user._id);
+      const userWallet = user.wallet?.accountId || user.hederaAccount?.accountId;
+
+      console.log('👤 Is creator check:', { creatorId, userId: user._id, isCreator });
 
       let ownedNFT = comic.nfts?.find(nft => {
         // Method 1: Check by user ID
@@ -63,30 +98,89 @@ export default function NFTActionModal({ comic, isOpen, onClose, onSuccess }) {
         const userIdMatch = String(nftOwnerId) === String(user._id);
 
         // Method 2: Check by wallet address
-        const nftWallet = nft.ownerAccountId;
+        const nftWallet = nft.owner; // mintedNFTs stores Hedera account as 'owner'
         const walletMatch = userWallet && nftWallet && String(nftWallet) === String(userWallet);
 
-        console.log(`NFT #${nft.serialNumber}: owner=${nftOwnerId}, wallet=${nftWallet}`);
+        console.log(`NFT #${nft.serialNumber}: owner=${nft.owner}, nftOwnerId=${nftOwnerId}`);
+        console.log(`  User wallet: ${userWallet}, NFT wallet: ${nftWallet}`);
         console.log(`  User ID match: ${userIdMatch}, Wallet match: ${walletMatch}`);
 
         return userIdMatch || walletMatch;
       });
 
       // Method 3: If user is the creator and has minted NFTs, they own ALL of them
-      if (!ownedNFT && isCreator && comic.nfts && comic.nfts.length > 0) {
-        console.log('✅ User is creator, using first NFT');
-        ownedNFT = comic.nfts[0];
+      if (!ownedNFT && isCreator && comic.minted > 0) {
+        console.log('✅ User is creator, using first minted NFT');
+        // Create a mock NFT for the creator
+        ownedNFT = comic.nfts?.[0] || { serialNumber: 1, owner: userWallet };
       }
 
       if (!ownedNFT) {
         console.error('❌ No owned NFT found');
         console.error('User ID:', user._id);
-        console.error('NFTs:', comic.nfts);
-        toast.error('You do not own any NFT from this comic');
+        console.error('NFTs array:', comic.nfts);
+        console.error('Creator check failed:', {
+          creatorId,
+          userId: user._id,
+          isCreator,
+          mintedCount: comic.minted,
+          nftsLength: comic.nfts?.length
+        });
+
+        // More specific error messages
+        if (!comic.nfts || comic.nfts.length === 0) {
+          toast.error('No NFTs found for this comic. Please mint some first.');
+        } else if (!isCreator) {
+          toast.error(`You are not the creator. Creator ID: ${creatorId}, Your ID: ${user._id}`);
+        } else {
+          toast.error('You do not own any NFT from this comic');
+        }
         return;
       }
 
       console.log('✅ Found owned NFT:', ownedNFT);
+
+      // Step 1: Get marketplace operator account ID
+      console.log('🔍 Fetching marketplace operator account...');
+      let operatorAccountId;
+      try {
+        const operatorResponse = await axios.get(`${API_BASE}/marketplace/operator`);
+        operatorAccountId = operatorResponse.data?.data?.operatorAccountId;
+
+        if (!operatorAccountId) {
+          throw new Error('Marketplace operator not configured');
+        }
+
+        console.log('✅ Marketplace operator:', operatorAccountId);
+      } catch (error) {
+        console.error('❌ Failed to get marketplace operator:', error);
+        toast.error('Failed to get marketplace configuration');
+        return;
+      }
+
+      // Step 2: Approve NFT allowance for marketplace operator
+      console.log('🔐 Approving NFT for marketplace operator...');
+      toast.loading('Please approve marketplace operator in HashPack...', { id: 'approve-nft' });
+
+      try {
+        if (!comic.collectionTokenId) {
+          throw new Error('Comic missing collection token ID');
+        }
+
+        const tokenId = TokenId.fromString(comic.collectionTokenId);
+        await hashPackWallet.approveNFTAllowance(tokenId, ownedNFT.serialNumber, operatorAccountId);
+
+        console.log('✅ NFT allowance approved for marketplace operator');
+        toast.success('NFT approved for marketplace!', { id: 'approve-nft' });
+      } catch (approvalError) {
+        console.error('❌ NFT approval failed:', approvalError);
+        toast.error('Failed to approve NFT. You must approve the transfer to list on marketplace.', { id: 'approve-nft' });
+        return;
+      }
+
+      // Step 2: Create marketplace listing
+      console.log('📝 Creating marketplace listing...');
+      toast.loading('Creating listing...', { id: 'create-listing' });
 
       await axios.post(
         `${API_BASE}/marketplace/list`,
@@ -99,7 +193,10 @@ export default function NFTActionModal({ comic, isOpen, onClose, onSuccess }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success('Listed on marketplace successfully!');
+      toast.success('✅ Listed on marketplace!\n\nYour NFT is approved for automatic transfer - buyers can purchase instantly!', {
+        id: 'create-listing',
+        duration: 4000
+      });
       onSuccess();
       onClose();
     } catch (error) {
@@ -123,37 +220,64 @@ export default function NFTActionModal({ comic, isOpen, onClose, onSuccess }) {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const userString = localStorage.getItem('user');
-      const user = userString ? JSON.parse(userString) : null;
 
+      // Try multiple ways to get user data
+      let user = null;
+      const userString = localStorage.getItem('user');
+
+      if (userString) {
+        try {
+          user = JSON.parse(userString);
+        } catch (e) {
+          console.error('Failed to parse user from localStorage:', e);
+        }
+      }
+
+      // If not in localStorage, try to fetch from API
       if (!user) {
+        console.log('🔍 User not in localStorage, fetching from API...');
+        const response = await axios.get(`${API_BASE}/users/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        user = response.data?.data?.user || response.data?.user || response.data;
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+
+      // Normalize user object - backend may return 'id' or '_id'
+      if (user && user.id && !user._id) {
+        user._id = user.id;
+      }
+
+      if (!user || !user._id) {
         toast.error('User not found. Please login again.');
         return;
       }
 
       console.log('🔍 Checking ownership for auction - user:', user._id);
       console.log('💳 User Hedera Account:', user.hederaAccount?.accountId);
+      console.log('💳 User Wallet Account:', user.wallet?.accountId);
       console.log('📦 Comic NFTs:', comic.nfts);
 
       // Find an NFT owned by the current user
-      const isCreator = comic.creator?._id === user._id || comic.creator === user._id;
-      const userWallet = user.hederaAccount?.accountId;
+      const creatorId = typeof comic.creator === 'object' ? comic.creator?._id : comic.creator;
+      const isCreator = String(creatorId) === String(user._id);
+      const userWallet = user.wallet?.accountId || user.hederaAccount?.accountId;
 
       let ownedNFT = comic.nfts?.find(nft => {
         // Check by user ID OR wallet address
         const nftOwnerId = nft.owner?._id || nft.owner;
         const userIdMatch = String(nftOwnerId) === String(user._id);
 
-        const nftWallet = nft.ownerAccountId;
+        const nftWallet = nft.owner; // mintedNFTs stores Hedera account as 'owner'
         const walletMatch = userWallet && nftWallet && String(nftWallet) === String(userWallet);
 
         return userIdMatch || walletMatch;
       });
 
       // Creator owns all minted NFTs
-      if (!ownedNFT && isCreator && comic.nfts && comic.nfts.length > 0) {
+      if (!ownedNFT && isCreator && comic.minted > 0) {
         console.log('✅ User is creator, using first NFT for auction');
-        ownedNFT = comic.nfts[0];
+        ownedNFT = comic.nfts?.[0] || { serialNumber: 1, owner: userWallet };
       }
 
       if (!ownedNFT) {
@@ -163,6 +287,48 @@ export default function NFTActionModal({ comic, isOpen, onClose, onSuccess }) {
       }
 
       console.log('✅ Found owned NFT for auction:', ownedNFT);
+
+      // Step 1: Get marketplace operator account ID
+      console.log('🔍 Fetching marketplace operator account...');
+      let operatorAccountId;
+      try {
+        const operatorResponse = await axios.get(`${API_BASE}/marketplace/operator`);
+        operatorAccountId = operatorResponse.data?.data?.operatorAccountId;
+
+        if (!operatorAccountId) {
+          throw new Error('Marketplace operator not configured');
+        }
+
+        console.log('✅ Marketplace operator:', operatorAccountId);
+      } catch (error) {
+        console.error('❌ Failed to get marketplace operator:', error);
+        toast.error('Failed to get marketplace configuration');
+        return;
+      }
+
+      // Step 2: Approve NFT allowance for marketplace operator
+      console.log('🔐 Approving NFT for marketplace operator (auction)...');
+      toast.loading('Please approve marketplace operator in HashPack...', { id: 'approve-nft-auction' });
+
+      try {
+        if (!comic.collectionTokenId) {
+          throw new Error('Comic missing collection token ID');
+        }
+
+        const tokenId = TokenId.fromString(comic.collectionTokenId);
+        await hashPackWallet.approveNFTAllowance(tokenId, ownedNFT.serialNumber, operatorAccountId);
+
+        console.log('✅ NFT allowance approved for marketplace operator (auction)');
+        toast.success('NFT approved for auction!', { id: 'approve-nft-auction' });
+      } catch (approvalError) {
+        console.error('❌ NFT approval failed:', approvalError);
+        toast.error('Failed to approve NFT. You must approve the transfer to start auction.', { id: 'approve-nft-auction' });
+        return;
+      }
+
+      // Step 2: Create auction listing
+      console.log('📝 Creating auction listing...');
+      toast.loading('Starting auction...', { id: 'create-auction' });
 
       // Calculate auction duration in hours
       const endDate = new Date(auctionEndDate);
@@ -182,7 +348,10 @@ export default function NFTActionModal({ comic, isOpen, onClose, onSuccess }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success('Auction started successfully!');
+      toast.success('✅ Auction started!\n\nYour NFT is approved for automatic transfer - winning bidder can claim instantly!', {
+        id: 'create-auction',
+        duration: 4000
+      });
       onSuccess();
       onClose();
     } catch (error) {

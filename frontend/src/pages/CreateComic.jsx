@@ -81,29 +81,15 @@ export default function CreateComic() {
 
     setLoading(true);
     try {
-      // Step 1: Create collection on Hedera with user's signature
+      // Create collection on Hedera using backend (no WalletConnect needed!)
       toast.loading('Creating collection on Hedera testnet...', { id: 'collection' });
 
-      const hederaResult = await createNFTCollection({
-        name: newCollection.name,
-        symbol: newCollection.symbol,
-        royaltyPercentage: newCollection.royaltyPercentage
-      });
-
-      console.log('✅ Hedera collection created:', hederaResult);
-
-      // Step 2: Save metadata to backend
-      toast.loading('Saving collection metadata...', { id: 'collection' });
-
       const token = localStorage.getItem('token');
-      const response = await axios.post(`${API_BASE}/comics/collections`, {
+      const response = await axios.post(`${API_BASE}/comics/collections/create-on-hedera`, {
         name: newCollection.name,
         symbol: newCollection.symbol,
         description: newCollection.description,
-        royaltyPercentage: newCollection.royaltyPercentage,
-        tokenId: hederaResult.tokenId,
-        transactionId: hederaResult.transactionId,
-        treasuryAccountId: accountId
+        royaltyPercentage: newCollection.royaltyPercentage
       }, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -111,7 +97,12 @@ export default function CreateComic() {
         }
       });
 
-      toast.success(`Collection created! Token ID: ${hederaResult.tokenId}`, { id: 'collection' });
+      const { collection, hedera } = response.data.data;
+
+      console.log('✅ Collection created:', collection);
+      console.log('✅ Hedera result:', hedera);
+
+      toast.success(`Collection created! Token ID: ${hedera.tokenId}`, { id: 'collection' });
 
       setSelectedCollection(response.data.data.collection);
       setShowNewCollection(false);
@@ -248,7 +239,13 @@ export default function CreateComic() {
 
       toast.success('Uploaded to IPFS! ✅', { id: 'upload' });
 
-      setCreatedComicId(response.data.data.comic._id);
+      // Backend returns 'episode' not 'comic'
+      const episodeId = response.data.data.episode?._id;
+      if (!episodeId) {
+        throw new Error('No episode ID in response');
+      }
+
+      setCreatedComicId(episodeId);
       setMintingStep('creating');
       setStep(2);
     } catch (error) {
@@ -268,14 +265,14 @@ export default function CreateComic() {
     try {
       const token = localStorage.getItem('token');
 
-      // Step 1: Get comic data from backend
-      toast.loading('Fetching comic metadata...', { id: 'mint' });
-      const comicResponse = await axios.get(`${API_BASE}/comics/${createdComicId}`, {
+      // Step 1: Get episode data from backend (createdComicId is actually an episode ID)
+      toast.loading('Fetching episode metadata...', { id: 'mint' });
+      const episodeResponse = await axios.get(`${API_BASE}/comics/episodes/${createdComicId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      const comic = comicResponse.data.data.comic;
-      const metadataUri = comic.content.metadataUri;
+      const episode = episodeResponse.data.data;
+      const metadataUri = episode.content.metadataUri;
       const supply = parseInt(comicData.supply);
 
       // Step 2: Mint NFTs on Hedera using user's wallet (ONE AT A TIME)
@@ -285,7 +282,15 @@ export default function CreateComic() {
       const metadataArray = Array(supply).fill(metadataUri);
 
       // Call frontend Hedera service to mint with wallet (handles batching internally)
-      const mintResult = await mintNFTs(selectedCollection.tokenId, metadataArray);
+      // Use collectionTokenId from backend (not tokenId)
+      const tokenId = selectedCollection.collectionTokenId || selectedCollection.tokenId;
+
+      if (!tokenId) {
+        throw new Error('Collection token ID not found. Please try recreating the collection.');
+      }
+
+      console.log('Using token ID:', tokenId);
+      const mintResult = await mintNFTs(tokenId, metadataArray);
 
       toast.success(`All ${supply} NFT(s) minted successfully! ✅`, { id: 'mint' });
 
@@ -293,7 +298,7 @@ export default function CreateComic() {
       toast.loading('Saving mint results...', { id: 'mint' });
 
       const response = await axios.post(
-        `${API_BASE}/comics/${createdComicId}/mint`,
+        `${API_BASE}/comics/episodes/${createdComicId}/mint`,
         {
           serialNumbers: mintResult.serials,
           transactionId: mintResult.transactionId
@@ -733,11 +738,11 @@ export default function CreateComic() {
                   <p className="text-gray-300 mb-4">Your comic NFTs have been minted on Hedera</p>
 
                   <div className="bg-green-900/30 border border-green-500/30 rounded-lg p-6 text-left">
-                    <p className="text-sm text-gray-300 mb-2"><strong>Serial Numbers:</strong> {mintResult.hedera.serialNumbers.join(', ')}</p>
-                    <p className="text-sm text-gray-300 mb-2"><strong>Transaction:</strong> {mintResult.hedera.transactionId}</p>
-                    {mintResult.hedera.explorerUrl && (
+                    <p className="text-sm text-gray-300 mb-2"><strong>Serial Numbers:</strong> {mintResult.mintedNFTs?.join(', ') || 'N/A'}</p>
+                    <p className="text-sm text-gray-300 mb-2"><strong>Transaction:</strong> {mintResult.transactionId || 'N/A'}</p>
+                    {mintResult.explorerUrl && (
                       <a
-                        href={mintResult.hedera.explorerUrl}
+                        href={mintResult.explorerUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 text-sm"
@@ -749,10 +754,10 @@ export default function CreateComic() {
 
                   <div className="flex gap-4 justify-center mt-6">
                     <Link
-                      to="/creator-studio"
+                      to="/profile"
                       className="px-8 py-3 bg-purple-500 text-white rounded-lg font-bold hover:bg-purple-600"
                     >
-                      View in Studio
+                      View Your Collection
                     </Link>
                     <Link
                       to="/marketplace"

@@ -3,7 +3,27 @@ import api from './api';
 const marketplaceService = {
   getListings: async (params = {}) => {
     const response = await api.get('/marketplace/listings', { params });
-    return response.data?.listings || response.data?.data?.listings || [];
+    // Backend can return two formats:
+    // 1. Enhanced: {success: true, data: [...]} - array directly
+    // 2. Old: {success: true, data: {listings: [...], totalPages, currentPage, total}}
+    // After axios interceptor unwraps response.data
+
+    let listings = [];
+    if (Array.isArray(response?.data)) {
+      // Enhanced format - array directly
+      listings = response.data;
+    } else if (Array.isArray(response?.data?.listings)) {
+      // Old format - nested in listings property
+      listings = response.data.listings;
+    } else if (Array.isArray(response?.listings)) {
+      // Fallback
+      listings = response.listings;
+    }
+
+    console.log('📦 Raw response from api.get:', response);
+    console.log('📦 Extracted listings:', listings);
+    console.log('📦 Is array?', Array.isArray(listings));
+    return listings;
   },
 
   getListingById: async (id) => {
@@ -16,8 +36,9 @@ const marketplaceService = {
     return response.data;
   },
 
-  buyNFT: async (listingId, transactionData) => {
-    const response = await api.post(`/marketplace/listings/${listingId}/buy`, transactionData);
+  buyNFT: async (listingId) => {
+    // Backend will handle the transfer using operator signature
+    const response = await api.post(`/marketplace/listings/${listingId}/buy`);
     return response.data;
   },
 

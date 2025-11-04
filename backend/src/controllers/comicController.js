@@ -1,5 +1,5 @@
 // backend/src/controllers/comicController.js
-import { Comic, Collection, User } from '../models/index.js';
+import { Comic, User } from '../models/index.js';
 import hederaService from '../services/hederaService.js';
 import ipfsService from '../services/ipfsService.js';
 import logger from '../utils/logger.js';
@@ -7,6 +7,95 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import { cleanupFiles } from '../middleware/upload.js';
+
+/**
+ * @desc    Create NFT collection on Hedera (backend creates the collection)
+ * @route   POST /api/v1/comics/collections/create-on-hedera
+ * @access  Private (Creator)
+ */
+export const createCollectionOnHedera = asyncHandler(async (req, res) => {
+  const {
+    name,
+    symbol,
+    description,
+    royaltyPercentage,
+    maxSupply,
+    category,
+    tags
+  } = req.body;
+
+  const userId = req.user.id;
+  const userAccountId = req.user.wallet?.accountId || req.user.hederaAccount?.accountId;
+
+  if (!userAccountId) {
+    return res.status(400).json({
+      success: false,
+      message: 'Wallet not connected. Please connect your Hedera wallet.'
+    });
+  }
+
+  try {
+    logger.info(`Creating NFT collection on Hedera: ${name} (${symbol}) for user ${userId}`);
+
+    // Create collection on Hedera using backend operator
+    const hederaResult = await hederaService.createCollection({
+      name,
+      symbol,
+      creatorAccountId: userAccountId,
+      royaltyPercentage: royaltyPercentage || 10,
+      maxSupply: maxSupply || 0
+    });
+
+    logger.info(`✅ Collection created on Hedera: ${hederaResult.tokenId}`);
+
+    // Upload cover image to IPFS if provided
+    let coverImage;
+    if (req.files?.coverImage) {
+      const upload = await ipfsService.uploadFile(
+        req.files.coverImage[0].path,
+        {
+          metadata: {
+            name: `${name}-cover`,
+            type: 'collection-cover'
+          }
+        }
+      );
+      coverImage = upload.url;
+
+      // Cleanup uploaded file
+      fs.unlinkSync(req.files.coverImage[0].path);
+    }
+
+    // Create collection in database using Comic model
+    const collection = await Comic.create({
+      title: name,
+      description,
+      creator: userId,
+      creatorAccountId: userAccountId,
+      collectionTokenId: hederaResult.tokenId,
+      royaltyPercentage: royaltyPercentage || 10,
+      maxSupply: maxSupply || 0,
+      coverImage: coverImage ? { url: coverImage } : undefined,
+      tags: tags ? tags.split(',').map(t => t.trim()) : [],
+      genres: category ? [category] : []
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Collection created successfully on Hedera',
+      data: {
+        collection,
+        hedera: hederaResult
+      }
+    });
+  } catch (error) {
+    logger.error('Failed to create collection on Hedera:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to create collection'
+    });
+  }
+});
 
 /**
  * @desc    Save NFT collection metadata (collection already created on frontend)
@@ -796,6 +885,7 @@ export const getUserComics = asyncHandler(async (req, res) => {
 });
 
 export default {
+  createCollectionOnHedera,
   createCollection,
   getCollections,
   getCollectionById,

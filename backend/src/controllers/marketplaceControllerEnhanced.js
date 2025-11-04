@@ -24,7 +24,7 @@ export const createListing = async (req, res) => {
     } = req.body;
 
     const userId = req.user.id;
-    const accountId = req.user.wallet?.accountId;
+    const accountId = req.user.wallet?.accountId || req.user.hederaAccount?.accountId;
 
     if (!accountId) {
       return res.status(400).json({
@@ -75,7 +75,7 @@ export const createAuction = async (req, res) => {
     } = req.body;
 
     const userId = req.user.id;
-    const accountId = req.user.wallet?.accountId;
+    const accountId = req.user.wallet?.accountId || req.user.hederaAccount?.accountId;
 
     if (!accountId) {
       return res.status(400).json({
@@ -120,7 +120,7 @@ export const placeBid = async (req, res) => {
     const { amount, transactionId } = req.body;
 
     const userId = req.user.id;
-    const accountId = req.user.wallet?.accountId;
+    const accountId = req.user.wallet?.accountId || req.user.hederaAccount?.accountId;
 
     if (!accountId) {
       return res.status(400).json({
@@ -160,9 +160,26 @@ export const buyNFT = async (req, res) => {
     const { listingId } = req.params;
 
     const buyerId = req.user.id;
-    const buyerAccountId = req.user.wallet?.accountId;
+    const walletAccountId = req.user.wallet?.accountId;
+    const hederaAccountId = req.user.hederaAccount?.accountId;
+    const buyerAccountId = walletAccountId || hederaAccountId;
+
+    logger.info('Buy NFT request:', {
+      listingId,
+      buyerId,
+      walletAccountId,
+      hederaAccountId,
+      buyerAccountId,
+      userWallet: req.user.wallet,
+      userHederaAccount: req.user.hederaAccount
+    });
 
     if (!buyerAccountId) {
+      logger.error('No buyer account ID found:', {
+        wallet: req.user.wallet,
+        hederaAccount: req.user.hederaAccount,
+        user: req.user
+      });
       return res.status(400).json({
         success: false,
         message: 'Hedera wallet not connected'
@@ -377,3 +394,4 @@ export default {
   getMyListings,
   getMarketplaceStats
 };
+

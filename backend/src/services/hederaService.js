@@ -3,6 +3,7 @@ import {
   Client,
   AccountId,
   PrivateKey,
+  PublicKey,
   TokenCreateTransaction,
   TokenType,
   TokenSupplyType,
@@ -82,6 +83,31 @@ class HederaService {
   }
 
   /**
+   * Fetch account public key from Hedera Mirror Node
+   */
+  async getAccountPublicKey(accountId) {
+    try {
+      const network = this.network === 'mainnet' ? 'mainnet-public' : 'testnet';
+      const response = await fetch(
+        `https://${network}.mirrornode.hedera.com/api/v1/accounts/${accountId}`
+      );
+      const data = await response.json();
+
+      if (!data.key || !data.key.key) {
+        throw new Error('Could not retrieve account public key');
+      }
+
+      // The key is returned as a hex string
+      const publicKey = PublicKey.fromString(data.key.key);
+      logger.info(`Retrieved public key for ${accountId}`);
+      return publicKey;
+    } catch (error) {
+      logger.error(`Failed to fetch account public key for ${accountId}:`, error);
+      throw new Error(`Failed to get account key: ${error.message}`);
+    }
+  }
+
+  /**
    * Create NFT collection (token)
    */
   async createCollection(options) {
@@ -92,13 +118,24 @@ class HederaService {
       symbol,
       creatorAccountId,
       royaltyPercentage = 10,
-      maxSupply = 0
+      maxSupply = 0,
+      creatorPublicKey // Optional: user's public key
     } = options;
 
     try {
       logger.info(`Creating NFT collection: ${name} (${symbol})`);
 
       const creatorAccount = AccountId.fromString(creatorAccountId);
+
+      // Get creator's public key for supply key
+      let supplyKey;
+      if (creatorPublicKey) {
+        supplyKey = PublicKey.fromString(creatorPublicKey);
+        logger.info('Using provided creator public key as supply key');
+      } else {
+        logger.info('Fetching creator public key from mirror node...');
+        supplyKey = await this.getAccountPublicKey(creatorAccountId);
+      }
 
       // Create custom royalty fee
       const royaltyFee = new CustomRoyaltyFee()
@@ -108,16 +145,19 @@ class HederaService {
         .setFallbackFee(new CustomFixedFee().setHbarAmount(new Hbar(1)));
 
       // Create token transaction
+      // Treasury must be the operator account (who signs the transaction)
+      // Supply key will be the creator's key (so they can mint)
+      // Royalties will still go to the creator via royaltyFee
       const transaction = new TokenCreateTransaction()
         .setTokenName(name)
         .setTokenSymbol(symbol)
         .setTokenType(TokenType.NonFungibleUnique)
         .setDecimals(0)
         .setInitialSupply(0)
-        .setTreasuryAccountId(creatorAccount)
+        .setTreasuryAccountId(this.operatorId) // Use operator as treasury
         .setSupplyType(maxSupply > 0 ? TokenSupplyType.Finite : TokenSupplyType.Infinite)
         .setMaxSupply(maxSupply)
-        .setSupplyKey(this.operatorKey)
+        .setSupplyKey(supplyKey) // Use creator's public key so they can mint
         .setCustomFees([royaltyFee])
         .setAdminKey(this.operatorKey)
         .setFreezeDefault(false);
@@ -128,10 +168,13 @@ class HederaService {
       const tokenId = receipt.tokenId.toString();
 
       logger.info(`NFT collection created: ${tokenId}`);
+      logger.info(`Supply key set to creator's public key: ${supplyKey.toString()}`);
 
       return {
         tokenId,
-        supplyKey: this.operatorKey.toString(),
+        treasuryAccountId: this.operatorId.toString(),
+        creatorAccountId: creatorAccountId, // Original creator for royalties
+        supplyKey: supplyKey.toString(), // Creator's public key (so they can mint)
         transactionId: txResponse.transactionId.toString(),
         explorerUrl: this.getExplorerUrl('token', tokenId)
       };
@@ -203,29 +246,37 @@ class HederaService {
     } = options;
 
     try {
-      logger.info(`Transferring NFT ${tokenId}/${serialNumber} from ${fromAccountId} to ${toAccountId}`);
+      logger.info(`Transferring NFT ${tokenId}/${serialNumber} from ${fromAccountId} to ${toAccountId} using operator allowance`);
 
       const token = TokenId.fromString(tokenId);
-      const nftId = new NftId(token, serialNumber);
       const sender = AccountId.fromString(fromAccountId);
       const receiver = AccountId.fromString(toAccountId);
 
-      // Create transfer transaction
+      // Create transfer transaction using APPROVED transfer
+      // The operator (marketplace) was pre-approved by seller when listing
+      // Only the operator needs to sign this transaction
       const transaction = new TransferTransaction()
-        .addNftTransfer(nftId, sender, receiver);
+        .addApprovedNftTransfer(token, serialNumber, sender, receiver);
 
-      // Add HBAR payment if price specified
-      if (price && price > 0) {
-        transaction
-          .addHbarTransfer(receiver, new Hbar(-price))
-          .addHbarTransfer(sender, new Hbar(price));
-      }
+      // NOTE: We're NOT adding HBAR payment in the same transaction
+      // because that would require buyer's signature which we don't have on backend
+      // In production, you'd want to:
+      // 1. Have buyer send payment transaction first
+      // 2. Verify payment on-chain
+      // 3. Then transfer NFT using operator allowance
+      // OR use an escrow smart contract
 
-      // Execute transaction
-      const txResponse = await transaction.execute(this.client);
+      // Freeze transaction with client first
+      const frozenTx = await transaction.freezeWith(this.client);
+
+      // Sign with operator key (marketplace has been approved to move the NFT)
+      const signedTx = await frozenTx.sign(this.operatorKey);
+
+      // Execute transaction with client operator
+      const txResponse = await signedTx.execute(this.client);
       const receipt = await txResponse.getReceipt(this.client);
 
-      logger.info(`NFT transferred successfully: ${txResponse.transactionId.toString()}`);
+      logger.info(`NFT transferred successfully using allowance: ${txResponse.transactionId.toString()}`);
 
       return {
         transactionId: txResponse.transactionId.toString(),

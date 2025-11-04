@@ -2,6 +2,7 @@
 import express from 'express';
 import { body, query, param } from 'express-validator';
 import {
+  createCollectionOnHedera,
   createCollection,
   getCollections,
   getCollectionById,
@@ -24,6 +25,54 @@ import { mintLimiter, uploadLimiter } from '../middleware/rateLimiter.js';
 const router = express.Router();
 
 // ========== COLLECTION ROUTES ==========
+
+/**
+ * @route   POST /api/v1/comics/collections/create-on-hedera
+ * @desc    Create NFT collection on Hedera (backend creates it)
+ * @access  Private (Creator)
+ */
+router.post(
+  '/collections/create-on-hedera',
+  protect,
+  requireCreator,
+  uploadLimiter,
+  uploadCollectionCover,
+  [
+    body('name')
+      .trim()
+      .notEmpty()
+      .withMessage('Collection name is required')
+      .isLength({ min: 3, max: 50 })
+      .withMessage('Name must be between 3 and 50 characters'),
+    body('symbol')
+      .trim()
+      .notEmpty()
+      .withMessage('Symbol is required')
+      .isLength({ min: 2, max: 10 })
+      .withMessage('Symbol must be between 2 and 10 characters')
+      .matches(/^[A-Z0-9]+$/)
+      .withMessage('Symbol must be uppercase letters and numbers only'),
+    body('description')
+      .optional()
+      .trim()
+      .isLength({ max: 1000 })
+      .withMessage('Description must be less than 1000 characters'),
+    body('royaltyPercentage')
+      .optional()
+      .isFloat({ min: 5, max: 25 })
+      .withMessage('Royalty must be between 5% and 25%'),
+    body('maxSupply')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage('Max supply must be a positive integer'),
+    body('category')
+      .optional()
+      .isIn(['superhero', 'manga', 'horror', 'sci-fi', 'fantasy', 'indie', 'webcomic', 'other'])
+      .withMessage('Invalid category')
+  ],
+  validate,
+  createCollectionOnHedera
+);
 
 /**
  * @route   POST /api/v1/comics/collections
@@ -370,3 +419,4 @@ router.delete(
 );
 
 export default router;
+

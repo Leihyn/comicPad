@@ -15,6 +15,7 @@ import {
   getMyComics,
   getMyCollection
 } from '../controllers/comicControllerEnhanced.js';
+import { createCollectionOnHedera } from '../controllers/comicController.js';
 import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -48,24 +49,40 @@ const upload = multer({
   }
 });
 
-// Comic routes
-router.post('/', protect, upload.single('cover'), createComic);
-router.get('/', getComics);
-router.get('/my-comics', protect, getMyComics);
-router.get('/my-collection', protect, getMyCollection);
-router.get('/:comicId', getComic);
+// IMPORTANT: Specific routes MUST come before wildcard routes like /:comicId
 
-// Episode routes
-router.post('/:comicId/episodes', protect, upload.fields([
+// Comic creation routes
+// When collectionId is provided, this creates an episode (comic issue) with cover + pages
+// When no collectionId, this creates a collection with just cover
+router.post('/', protect, upload.fields([
   { name: 'cover', maxCount: 1 },
   { name: 'pages', maxCount: 100 }
-]), createEpisode);
+]), createComic);
+router.post('/collections', protect, upload.single('cover'), createComic); // Alias for frontend compatibility (collection creation only)
+router.post('/collections/create-on-hedera', protect, upload.single('cover'), createCollectionOnHedera); // Backend collection creation (bypasses WalletConnect)
 
-// Episode-specific routes
+// Comic list routes (must be before /:comicId)
+router.get('/', getComics);
+router.get('/collections', getComics); // Alias - same as getting all comics
+router.get('/my-comics', protect, getMyComics);
+router.get('/creator/my-comics', protect, getMyComics); // Alias for frontend
+router.get('/my-collection', protect, getMyCollection);
+router.get('/user/collection', protect, getMyCollection); // Alias for frontend
+
+// Episode-specific routes (must be before /:comicId)
 router.post('/episodes/:episodeId/publish', protect, publishEpisode);
 router.post('/episodes/:episodeId/mint', protect, mintEpisodeNFT);
 router.get('/episodes/:episodeId', getEpisode);
 router.get('/episodes/:episodeId/read', protect, readEpisode);
 router.put('/episodes/:episodeId/progress', protect, updateReadingProgress);
+
+// Episode creation (must be before /:comicId)
+router.post('/:comicId/episodes', protect, upload.fields([
+  { name: 'cover', maxCount: 1 },
+  { name: 'pages', maxCount: 100 }
+]), createEpisode);
+
+// Comic detail route (MUST be last - catches everything else)
+router.get('/:comicId', getComic);
 
 export default router;

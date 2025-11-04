@@ -7,6 +7,11 @@ import { AllWalletsProvider } from './services/wallets/AllWalletsProvider';
 import { Toaster } from 'react-hot-toast';
 import './styles/globals.css';
 
+// Load wallet test utilities in development
+if (import.meta.env.DEV) {
+  import('./utils/testWalletConnection');
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>

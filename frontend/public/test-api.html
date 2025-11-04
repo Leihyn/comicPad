@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        pre {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .error {
+            color: #ff4444;
+        }
+        .success {
+            color: #44ff44;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Marketplace API Debug Test</h1>
+    <button onclick="testAPI()">Test API Call</button>
+    <div id="output"></div>
+
+    <script>
+        async function testAPI() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Testing API...</p>';
+
+            try {
+                console.log('Making API call to http://localhost:3001/api/v1/marketplace/listings?sortBy=createdAt');
+
+                const response = await fetch('http://localhost:3001/api/v1/marketplace/listings?sortBy=createdAt');
+
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+
+                const data = await response.json();
+
+                console.log('Raw response data:', data);
+                console.log('Data structure:', typeof data);
+                console.log('data.success:', data.success);
+                console.log('data.data:', data.data);
+                console.log('Is data.data an array?', Array.isArray(data.data));
+                console.log('Listings count:', data.data?.length);
+
+                let html = '<h2 class="success">✅ API Response Received!</h2>';
+                html += '<p><strong>Status:</strong> ' + response.status + '</p>';
+                html += '<p><strong>Success:</strong> ' + data.success + '</p>';
+                html += '<p><strong>Listings Count:</strong> ' + (data.data?.length || 0) + '</p>';
+                html += '<h3>Full Response:</h3>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+
+                if (Array.isArray(data.data) && data.data.length > 0) {
+                    html += '<h3 class="success">✅ Listings Found!</h3>';
+                    data.data.forEach((listing, index) => {
+                        html += '<div style="border: 2px solid #4CAF50; padding: 10px; margin: 10px 0; border-radius: 8px;">';
+                        html += '<h4>Listing ' + (index + 1) + '</h4>';
+                        html += '<p><strong>Title:</strong> ' + (listing.metadata?.title || listing.episode?.title || 'N/A') + '</p>';
+                        html += '<p><strong>Type:</strong> ' + listing.listingType + '</p>';
+                        html += '<p><strong>Price:</strong> ' + (listing.price?.amount || listing.price || 0) + ' HBAR</p>';
+                        html += '<p><strong>Image:</strong> ' + (listing.metadata?.imageUrl || 'N/A') + '</p>';
+                        html += '</div>';
+                    });
+                } else {
+                    html += '<p class="error">⚠️ No listings found in response!</p>';
+                }
+
+                output.innerHTML = html;
+
+            } catch (error) {
+                console.error('API call failed:', error);
+                output.innerHTML = '<h2 class="error">❌ API Call Failed!</h2><pre class="error">' + error.message + '\n\n' + error.stack + '</pre>';
+            }
+        }
+
+        // Auto-run on page load
+        window.onload = () => {
+            testAPI();
+        };
+    </script>
+</body>
+</html>

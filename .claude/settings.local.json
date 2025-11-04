@@ -15,7 +15,21 @@
       "Bash(curl:*)",
       "Bash(taskkill //F //PID 11436)",
       "Bash(src/server.js)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(node scripts/updateWallet.js:*)",
+      "Bash(pkill:*)",
+      "Bash(taskkill:*)",
+      "Bash(nul)",
+      "Bash(npm run build:*)",
+      "Bash(python -m json.tool)",
+      "Bash(node test-mongo-connection.js:*)",
+      "Bash(backend/src/models/Listing.js)",
+      "Bash(backend/src/controllers/marketplaceControllerEnhanced.js)",
+      "Bash(node scripts/migrateWalletField.js:*)",
+      "Bash(src/routes/comicRoutes.js)",
+      "Bash(server.js)",
+      "Bash(tasklist:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

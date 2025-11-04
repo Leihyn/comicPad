@@ -195,7 +195,12 @@ class ComicService {
           maxSupply: maxSupply || 0,
           currentSupply: 0
         },
-        status: 'ready'
+        status: 'ready',
+        isLive: true, // Enable minting immediately for creator
+        mintingRules: {
+          enabled: true // Enable minting
+        },
+        publishedAt: new Date()
       });
 
       // Update comic stats
@@ -211,6 +216,53 @@ class ComicService {
     } catch (error) {
       logger.error('Error creating episode:', error);
       throw new Error(`Failed to create episode: ${error.message}`);
+    }
+  }
+
+  /**
+   * Record Already-Minted NFTs (Frontend Minting)
+   * Records NFTs that were minted on the frontend via wallet
+   */
+  async recordMintedNFTs(mintData) {
+    try {
+      const {
+        episodeId,
+        buyerAccountId,
+        serialNumbers,
+        transactionId
+      } = mintData;
+
+      logger.info(`Recording ${serialNumbers.length} minted NFT(s) for episode ${episodeId}`);
+
+      // Get episode
+      const episode = await Episode.findById(episodeId).populate('comic');
+      if (!episode) {
+        throw new Error('Episode not found');
+      }
+
+      // Record each minted NFT
+      for (const serialNumber of serialNumbers) {
+        await episode.addMintedNFT(
+          serialNumber,
+          buyerAccountId,
+          transactionId
+        );
+      }
+
+      // Update comic stats
+      await episode.comic.incrementStats('totalMinted', serialNumbers.length);
+
+      logger.info(`Recorded ${serialNumbers.length} NFTs successfully`);
+
+      return {
+        episode,
+        mintedNFTs: serialNumbers,
+        transactionId,
+        explorerUrl: `https://hashscan.io/testnet/transaction/${transactionId}`
+      };
+    } catch (error) {
+      logger.error('Error recording minted NFTs:', error);
+      throw new Error(`Failed to record minted NFTs: ${error.message}`);
     }
   }
 
@@ -322,13 +374,16 @@ class ComicService {
    */
   async verifyEpisodeAccess(episodeId, userAccountId, userId) {
     try {
-      const episode = await Episode.findById(episodeId);
+      const episode = await Episode.findById(episodeId).populate('comic');
       if (!episode) {
         throw new Error('Episode not found');
       }
 
+      // Check if user is the creator (creators can always read their own comics)
+      const isCreator = episode.creator && episode.creator.toString() === userId.toString();
+
       // Check access rights
-      const hasAccess = await episode.canAccess(userAccountId);
+      const hasAccess = isCreator || await episode.canAccess(userAccountId);
 
       if (!hasAccess && hasAccess !== 'preview') {
         return {
@@ -342,15 +397,15 @@ class ComicService {
       let accessType = 'preview';
       let nftOwnership = null;
 
-      if (hasAccess === true) {
+      if (hasAccess === true || isCreator) {
         // Find owned NFT
         const ownedNFT = episode.mintedNFTs.find(nft => nft.owner === userAccountId);
-        if (ownedNFT) {
+        if (ownedNFT || isCreator) {
           accessType = 'nft-owner';
-          nftOwnership = {
+          nftOwnership = ownedNFT ? {
             tokenId: episode.collectionTokenId,
             serialNumber: ownedNFT.serialNumber
-          };
+          } : { tokenId: episode.collectionTokenId, serialNumber: 'creator' };
         }
       }
 
@@ -385,8 +440,8 @@ class ComicService {
         hasAccess: true,
         accessType,
         nftOwnership,
-        readHistory,
-        content: accessType === 'nft-owner' ? episode.content : null
+        episode: accessType === 'nft-owner' ? episode : null,
+        progress: readHistory?.progress || null
       };
     } catch (error) {
       logger.error('Error verifying episode access:', error);

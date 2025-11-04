@@ -1,4 +1,4 @@
-import { Listing, Comic, User } from '../models/index.js';
+import { Listing, Comic, Episode, User } from '../models/index.js';
 import hederaService from '../services/hederaService.js';
 import logger from '../utils/logger.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
@@ -10,7 +10,7 @@ import { asyncHandler } from '../middleware/errorHandler.js';
  */
 export const createListing = asyncHandler(async (req, res) => {
   const {
-    comicId,
+    comicId, // This is actually episodeId from frontend
     serialNumber,
     price,
     listingType,
@@ -20,20 +20,22 @@ export const createListing = asyncHandler(async (req, res) => {
   } = req.body;
 
   const userId = req.user.id;
+  const userAccountId = req.user.wallet?.accountId || req.user.hederaAccount?.accountId;
 
-  // Verify comic and NFT ownership
-  const comic = await Comic.findById(comicId).populate('collection');
-  
-  if (!comic) {
+  // Verify episode and NFT ownership
+  const episode = await Episode.findById(comicId).populate('comic');
+
+  if (!episode) {
     return res.status(404).json({
       success: false,
-      message: 'Comic not found'
+      message: 'Episode not found'
     });
   }
 
-  const nft = comic.nfts.find(n => 
+  // Check ownership - either by user ID (creator) or by Hedera account ID (NFT owner)
+  const nft = episode.mintedNFTs.find(n =>
     n.serialNumber === parseInt(serialNumber) &&
-    n.owner.toString() === userId
+    (n.owner === userAccountId || episode.creator.toString() === userId)
   );
 
   if (!nft) {
@@ -45,7 +47,7 @@ export const createListing = asyncHandler(async (req, res) => {
 
   // Check if already listed
   const existingListing = await Listing.findOne({
-    comic: comicId,
+    episode: comicId,
     serialNumber,
     status: 'active'
   });
@@ -59,14 +61,23 @@ export const createListing = asyncHandler(async (req, res) => {
 
   // Create listing
   const listingData = {
-    comic: comicId,
-    tokenId: comic.collection.tokenId,
+    episode: comicId,
+    comic: episode.comic._id,
+    tokenId: episode.collectionTokenId,
     serialNumber: parseInt(serialNumber),
     seller: userId,
-    sellerAccountId: req.user.hederaAccount.accountId,
+    sellerAccountId: userAccountId,
     listingType,
-    price: listingType === 'fixed-price' ? Math.floor(parseFloat(price)) : 0, // MUST be integer for Hbar
-    status: 'active'
+    price: {
+      amount: listingType === 'fixed-price' ? Math.floor(parseFloat(price)) : 0, // MUST be integer for Hbar
+      currency: 'HBAR'
+    },
+    status: 'active',
+    metadata: {
+      title: episode.title,
+      description: episode.description,
+      imageUrl: episode.content?.coverImage?.url || episode.content?.coverImage?.ipfsHash
+    }
   };
 
   // Add auction details if auction

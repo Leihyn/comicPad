@@ -11,7 +11,7 @@ const comicSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    required: [true, 'Description is required'],
+    default: '',
     maxlength: [2000, 'Description must be less than 2000 characters']
   },
   series: {
@@ -141,7 +141,7 @@ const comicSchema = new mongoose.Schema({
 
 // Indexes
 comicSchema.index({ creator: 1, status: 1 });
-comicSchema.index({ collectionTokenId: 1 });
+// collectionTokenId already has unique index via schema definition
 comicSchema.index({ status: 1, isLive: 1 });
 comicSchema.index({ genres: 1 });
 comicSchema.index({ 'stats.totalViews': -1 });

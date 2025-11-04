@@ -55,37 +55,42 @@ export async function createNFTCollection(collectionData) {
     const publicKey = await getAccountPublicKey(treasuryAccount.toString());
     console.log('✅ Public key retrieved:', publicKey.toString());
 
-    // Create the token creation transaction WITH supply key
-    // This allows the user to mint NFTs to their collection
-    const tokenCreateTx = new TokenCreateTransaction()
-      .setTokenName(name)
-      .setTokenSymbol(symbol)
-      .setTokenType(TokenType.NonFungibleUnique)
-      .setSupplyType(TokenSupplyType.Infinite)
-      .setTreasuryAccountId(treasuryAccount)
-      .setSupplyKey(publicKey) // Set the user's public key as supply key
-      .setMaxTransactionFee(new Hbar(20)); // Increased fee for token creation
-
     // Wrap the signing and execution with retry logic for WalletConnect relay errors
     const result = await retryWithBackoff(async () => {
+      // Create the token creation transaction WITH supply key
+      // Create FRESH transaction for each retry attempt
+      console.log('🔧 Creating fresh token transaction...');
+      const tokenCreateTx = new TokenCreateTransaction()
+        .setTokenName(name)
+        .setTokenSymbol(symbol)
+        .setTokenType(TokenType.NonFungibleUnique)
+        .setSupplyType(TokenSupplyType.Infinite)
+        .setTreasuryAccountId(treasuryAccount)
+        .setSupplyKey(publicKey) // Set the user's public key as supply key
+        .setMaxTransactionFee(new Hbar(20)); // Increased fee for token creation
+
       console.log('🔧 Freezing transaction for signing...');
 
       // Freeze the transaction for signing
       const frozenTx = await tokenCreateTx.freezeWithSigner(signer);
 
-      console.log('✍️ Signing transaction with HashPack...');
+      console.log('✍️ Requesting signature from HashPack...');
+      console.log('👉 Please check for HashPack popup and approve the transaction!');
 
-      // Sign with user's wallet
-      const signedTx = await frozenTx.signWithSigner(signer);
+      // Show user notification
+      if (window.toast) {
+        window.toast.loading(
+          '👉 Please approve the transaction in HashPack wallet...',
+          { id: 'collection-create' }
+        );
+      }
 
-      console.log('📤 Submitting transaction to Hedera...');
-
-      // Execute the transaction
-      const txResponse = await signedTx.executeWithSigner(signer);
+      // Execute with signer (this will prompt for signature and execute)
+      const txResponse = await frozenTx.executeWithSigner(signer);
 
       console.log('⏳ Waiting for receipt...');
 
-      // Get the receipt
+      // Get the receipt using signer
       const receipt = await txResponse.getReceiptWithSigner(signer);
 
       // Get the token ID
@@ -153,8 +158,8 @@ async function retryWithBackoff(fn, maxRetries = 3, delayMs = 2000) {
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      // Add 60 second timeout to prevent hanging forever
-      return await promiseWithTimeout(fn(), 60000);
+      // Add 120 second timeout to allow time for user to sign in HashPack
+      return await promiseWithTimeout(fn(), 120000);
     } catch (error) {
       lastError = error;
       const errorMessage = error.message?.toLowerCase() || '';
@@ -264,18 +269,16 @@ export async function mintNFTs(tokenId, metadataURIs) {
           const mintTx = new TokenMintTransaction()
             .setTokenId(tokenId)
             .setMetadata([metadataBytes])
-            .setMaxTransactionFee(new Hbar(10));
+            .setMaxTransactionFee(new Hbar(10))
+            .setTransactionValidDuration(180); // 3 minutes validity
 
           console.log('✅ Transaction built successfully');
           console.log('🔧 Freezing transaction with signer...');
 
-          const frozenTx = await promiseWithTimeout(
-            mintTx.freezeWithSigner(signer),
-            30000 // 30 second timeout for freezing
-          );
+          const frozenTx = await mintTx.freezeWithSigner(signer);
           console.log('✅ Transaction frozen');
 
-          console.log('✍️ Preparing to sign transaction...');
+          console.log('✍️ Preparing to execute (sign + submit) transaction...');
 
           // Ensure browser has focus before signing (fixes "Document does not have focus" error)
           window.focus();
@@ -283,28 +286,17 @@ export async function mintNFTs(tokenId, metadataURIs) {
           // Wait for user to click to ensure focus and trigger signing
           if (window.toast) {
             window.toast.loading(
-              `Ready to sign NFT ${nftNumber}/${metadataURIs.length}. HashPack popup should appear...`,
+              `Please approve the transaction in HashPack...`,
               { id: 'mint' }
             );
           }
 
-          // Give user a moment to see the message and ensure tab has focus
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log('🔔 Requesting signature and execution from HashPack...');
+          console.log('⏰ Waiting for your approval (up to 3 minutes)...');
 
-          console.log('🔔 Requesting signature from HashPack...');
-
-          const signedTx = await promiseWithTimeout(
-            frozenTx.signWithSigner(signer),
-            90000 // Increased to 90 second timeout for signing (wait for user)
-          );
-          console.log('✅ Transaction signed');
-
-          console.log('📤 Executing transaction with signer...');
-          txResponse = await promiseWithTimeout(
-            signedTx.executeWithSigner(signer),
-            30000 // 30 second timeout for execution
-          );
-          console.log('✅ Transaction executed! TX ID:', txResponse.transactionId.toString());
+          // Execute with signer (NO TIMEOUT - let user take their time)
+          txResponse = await frozenTx.executeWithSigner(signer);
+          console.log('✅ Transaction signed and executed! TX ID:', txResponse.transactionId.toString());
 
           console.log('⏳ Getting receipt...');
           receipt = await promiseWithTimeout(

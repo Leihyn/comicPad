@@ -115,8 +115,7 @@ router.post(
       .matches(/^0\.0\.\d+$/)
       .withMessage('Invalid Hedera account ID format'),
     body('publicKey')
-      .notEmpty()
-      .withMessage('Public key is required')
+      .optional()
   ],
   validate,
   connectWallet
