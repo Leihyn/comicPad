@@ -1,25 +1,8 @@
 import rateLimit from 'express-rate-limit';
-import RedisStore from 'rate-limit-redis';
-import Redis from 'redis';
 import logger from '../utils/logger.js';
 
-// Create Redis client
-let redisClient;
-if (process.env.REDIS_URL) {
-  try {
-    redisClient = Redis.createClient({
-      url: process.env.REDIS_URL
-    });
-    
-    redisClient.on('error', (err) => {
-      logger.error('Redis rate limiter error:', err);
-    });
-    
-    redisClient.connect();
-  } catch (error) {
-    logger.error('Failed to create Redis client for rate limiting:', error);
-  }
-}
+// Disable Redis for now - use in-memory store
+// Redis can be added later if needed for production scaling
 
 /**
  * General API rate limiter
@@ -33,13 +16,7 @@ export const apiLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => process.env.NODE_ENV === 'development', // Skip rate limiting in development
-  ...(redisClient && {
-    store: new RedisStore({
-      client: redisClient,
-      prefix: 'rl:api:'
-    })
-  })
+  skip: (req) => process.env.NODE_ENV === 'development' // Skip rate limiting in development
 });
 
 /**
@@ -54,13 +31,7 @@ export const authLimiter = rateLimit({
     message: 'Too many authentication attempts, please try again later'
   },
   standardHeaders: true,
-  legacyHeaders: false,
-  ...(redisClient && {
-    store: new RedisStore({
-      client: redisClient,
-      prefix: 'rl:auth:'
-    })
-  })
+  legacyHeaders: false
 });
 
 /**
@@ -74,13 +45,7 @@ export const uploadLimiter = rateLimit({
     message: 'Upload limit exceeded, please try again later'
   },
   standardHeaders: true,
-  legacyHeaders: false,
-  ...(redisClient && {
-    store: new RedisStore({
-      client: redisClient,
-      prefix: 'rl:upload:'
-    })
-  })
+  legacyHeaders: false
 });
 
 /**
@@ -94,13 +59,7 @@ export const mintLimiter = rateLimit({
     message: 'Minting limit exceeded, please try again later'
   },
   standardHeaders: true,
-  legacyHeaders: false,
-  ...(redisClient && {
-    store: new RedisStore({
-      client: redisClient,
-      prefix: 'rl:mint:'
-    })
-  })
+  legacyHeaders: false
 });
 
 /**
@@ -114,13 +73,7 @@ export const searchLimiter = rateLimit({
     message: 'Search limit exceeded, please try again later'
   },
   standardHeaders: true,
-  legacyHeaders: false,
-  ...(redisClient && {
-    store: new RedisStore({
-      client: redisClient,
-      prefix: 'rl:search:'
-    })
-  })
+  legacyHeaders: false
 });
 
 export default apiLimiter;
