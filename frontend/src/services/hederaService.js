@@ -283,19 +283,113 @@ export async function mintNFTs(tokenId, metadataURIs) {
           // Ensure browser has focus before signing (fixes "Document does not have focus" error)
           window.focus();
 
-          // Wait for user to click to ensure focus and trigger signing
+          // Create a PROMINENT visual notification overlay
+          const notificationOverlay = document.createElement('div');
+          notificationOverlay.id = 'hashpack-approval-overlay';
+          notificationOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease-in;
+          `;
+
+          const notificationBox = document.createElement('div');
+          notificationBox.style.cssText = `
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 500px;
+            animation: slideUp 0.4s ease-out;
+          `;
+
+          notificationBox.innerHTML = `
+            <div style="font-size: 60px; margin-bottom: 20px; animation: pulse 1.5s infinite;">🔔</div>
+            <h2 style="font-size: 28px; font-weight: bold; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+              HashPack Approval Required
+            </h2>
+            <p style="font-size: 18px; margin-bottom: 20px; line-height: 1.6;">
+              Please check your <strong>HashPack extension</strong> to approve the transaction.
+            </p>
+            <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 10px; margin-top: 20px;">
+              <p style="font-size: 14px; margin: 0;">
+                👆 Click the <strong>HashPack icon</strong> in your browser toolbar<br>
+                ✅ Click <strong>"Approve"</strong> or <strong>"Sign"</strong>
+              </p>
+            </div>
+            <div style="margin-top: 25px; font-size: 14px; opacity: 0.9;">
+              <div class="spinner" style="display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+              <span style="margin-left: 10px;">Waiting for approval...</span>
+            </div>
+          `;
+
+          // Add CSS animations
+          const style = document.createElement('style');
+          style.textContent = `
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            @keyframes slideUp {
+              from { transform: translateY(50px); opacity: 0; }
+              to { transform: translateY(0); opacity: 1; }
+            }
+            @keyframes pulse {
+              0%, 100% { transform: scale(1); }
+              50% { transform: scale(1.1); }
+            }
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `;
+          document.head.appendChild(style);
+
+          notificationOverlay.appendChild(notificationBox);
+          document.body.appendChild(notificationOverlay);
+
+          // Also show toast
           if (window.toast) {
             window.toast.loading(
               `Please approve the transaction in HashPack...`,
-              { id: 'mint' }
+              { id: 'mint', duration: Infinity }
             );
           }
 
           console.log('🔔 Requesting signature and execution from HashPack...');
           console.log('⏰ Waiting for your approval (up to 3 minutes)...');
+          console.log('');
+          console.log('═══════════════════════════════════════════════════════');
+          console.log('  👆 PLEASE CHECK YOUR HASHPACK EXTENSION NOW!');
+          console.log('  Click the HashPack icon in your browser toolbar');
+          console.log('  and approve the pending transaction');
+          console.log('═══════════════════════════════════════════════════════');
+          console.log('');
 
-          // Execute with signer (NO TIMEOUT - let user take their time)
-          txResponse = await frozenTx.executeWithSigner(signer);
+          try {
+            // Execute with signer (NO TIMEOUT - let user take their time)
+            txResponse = await frozenTx.executeWithSigner(signer);
+
+            // Remove the notification overlay on success
+            if (notificationOverlay && notificationOverlay.parentNode) {
+              notificationOverlay.remove();
+            }
+          } catch (execError) {
+            // Remove the notification overlay on error
+            if (notificationOverlay && notificationOverlay.parentNode) {
+              notificationOverlay.remove();
+            }
+            throw execError;
+          }
           console.log('✅ Transaction signed and executed! TX ID:', txResponse.transactionId.toString());
 
           console.log('⏳ Getting receipt...');

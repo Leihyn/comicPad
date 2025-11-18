@@ -3845,3 +3845,354 @@
 {"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-04 22:36:08"}
 {"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-00.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-04 22:36:08"}
 {"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-04 22:36:08"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 15:42:58"}
+{"level":"info","message":"Server running in development mode on port 3001","service":"comic-pad-api","timestamp":"2025-11-17 15:42:58"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-01.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 15:42:59"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 15:42:59"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 16:31:43"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 16:31:43"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 16:31:48"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 16:31:48"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 16:31:53"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 16:32:54"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 16:32:54"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 16:32:58"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 16:32:58"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 16:32:59"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-01.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 16:32:59"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 16:32:59"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 16:44:07"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 16:44:07"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 16:44:07"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 16:44:07"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 16:44:08"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 16:44:08"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 16:44:08"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 16:44:08"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 16:44:12"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-01.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 16:44:12"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 16:44:12"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 16:44:13"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-01.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 16:44:13"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 16:44:13"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 16:58:19"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 16:58:19"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 16:58:19"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 16:58:19"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 16:58:19"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 16:58:19"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 16:58:19"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 16:58:19"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 16:58:24"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 16:58:24"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 16:58:24"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 16:58:24"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 16:58:28"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 16:58:28"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 16:58:28"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 16:58:28"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-00.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 16:58:28"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 16:58:28"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 16:58:30"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-00.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-00.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-00.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-00.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-00.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 16:58:35"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:40"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:41"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 17:01:45"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:45"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:45"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:45"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:45"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:45"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:45"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:45"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:45"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:45"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:46"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:46"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:46"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:46"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:46"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:46"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:46"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:46"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:46"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:46"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:48"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:48"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:48"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:48"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:48"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:48"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:48"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:48"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:48"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:48"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-01.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 17:01:48"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 17:01:48"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"info","message":"MongoDB reconnected successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:01:54"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:58"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 17:01:59"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:59"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:59"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:59"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:59"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:59"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:59"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:59"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:59"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:59"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:01:59"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:02:03"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:02:03"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:02:03"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:02:03"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:02:03"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:02:03"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:02:03"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:02:03"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:02:03"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:02:03"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 17:02:03"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:02:07"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:02:07"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:02:07"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:02:07"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:02:07"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:02:07"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:02:07"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:02:07"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:02:07"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:02:07"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 17:02:07"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-02.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 17:02:07"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 17:02:07"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 17:17:39"}
+{"level":"info","message":"Server running in development mode on port 3001","service":"comic-pad-api","timestamp":"2025-11-17 17:17:39"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-00.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 17:17:48"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 17:17:48"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 17:19:12"}
+{"level":"info","message":"Server running in development mode on port 3001","service":"comic-pad-api","timestamp":"2025-11-17 17:19:13"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-01.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 17:19:22"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 17:19:22"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 17:19:50"}
+{"level":"info","message":"Server running in development mode on port 3001","service":"comic-pad-api","timestamp":"2025-11-17 17:19:50"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-00.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 17:19:59"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 17:19:59"}
+{"level":"info","message":"Creating NFT collection on Hedera: farrukku (UKU) for user 69045675d5892180a07afa7a","service":"comic-pad-api","timestamp":"2025-11-17 17:26:03"}
+{"level":"info","message":"Hedera Service initialized for testnet","service":"comic-pad-api","timestamp":"2025-11-17 17:26:03"}
+{"level":"info","message":"Creating NFT collection: farrukku (UKU)","service":"comic-pad-api","timestamp":"2025-11-17 17:26:03"}
+{"level":"info","message":"Fetching creator public key from mirror node...","service":"comic-pad-api","timestamp":"2025-11-17 17:26:03"}
+{"level":"info","message":"Retrieved public key for 0.0.7163232","service":"comic-pad-api","timestamp":"2025-11-17 17:26:05"}
+{"level":"info","message":"NFT collection created: 0.0.7275254","service":"comic-pad-api","timestamp":"2025-11-17 17:26:09"}
+{"level":"info","message":"Supply key set to creator's public key: 302a300506032b657003210058d29f61d624081d40b07ebd35156a10187729f26def7b6ae68d2dd0821f84e1","service":"comic-pad-api","timestamp":"2025-11-17 17:26:09"}
+{"level":"info","message":"✅ Collection created on Hedera: 0.0.7275254","service":"comic-pad-api","timestamp":"2025-11-17 17:26:09"}
+{"level":"info","message":"Creating episode for collection: 691b4ca145c4d15b79447b08","service":"comic-pad-api","timestamp":"2025-11-17 17:27:56"}
+{"level":"info","message":"Next episode number for collection 691b4ca145c4d15b79447b08: 1","service":"comic-pad-api","timestamp":"2025-11-17 17:27:57"}
+{"level":"info","message":"Creating episode 1 for comic 691b4ca145c4d15b79447b08","service":"comic-pad-api","timestamp":"2025-11-17 17:27:57"}
+{"level":"info","message":"Loading Pinata JWT from environment","service":"comic-pad-api","timestamp":"2025-11-17 17:27:58"}
+{"level":"info","message":"JWT exists:","service":"comic-pad-api","timestamp":"2025-11-17 17:27:58"}
+{"level":"info","message":"JWT length:","service":"comic-pad-api","timestamp":"2025-11-17 17:27:58"}
+{"level":"info","message":"🚀 Attempting IPFS service initialization...","service":"comic-pad-api","timestamp":"2025-11-17 17:27:58"}
+{"level":"info","message":"🔐 Testing Pinata authentication...","service":"comic-pad-api","timestamp":"2025-11-17 17:27:58"}
+{"level":"info","message":"Congratulations! You are communicating with the Pinata API!","service":"comic-pad-api","timestamp":"2025-11-17 17:28:02"}
+{"level":"info","message":"✅ IPFS Service (Pinata) initialized successfully","service":"comic-pad-api","timestamp":"2025-11-17 17:28:02"}
+{"level":"info","message":"Uploading comic package: 691b4ca145c4d15b79447b08-ep1","service":"comic-pad-api","timestamp":"2025-11-17 17:28:02"}
+{"level":"info","message":"File uploaded to IPFS: QmTLk5gcvRZ2bqk1ovJ3uzAMuJKoDexFzDy1rJS7M8N557","service":"comic-pad-api","timestamp":"2025-11-17 17:28:07"}
+{"level":"info","message":"File uploaded to IPFS: QmWrbVZ1scP6Xqayx6CnACG9yGFFfR4u86oVsw2trupZmA","service":"comic-pad-api","timestamp":"2025-11-17 17:28:09"}
+{"level":"info","message":"Uploaded page 1/2","service":"comic-pad-api","timestamp":"2025-11-17 17:28:09"}
+{"level":"info","message":"File uploaded to IPFS: QmWxTNKmiKDnMcpP4XAaVz86VaCvPcJgVYdRmtt7RRqqdu","service":"comic-pad-api","timestamp":"2025-11-17 17:28:10"}
+{"level":"info","message":"Uploaded page 2/2","service":"comic-pad-api","timestamp":"2025-11-17 17:28:10"}
+{"level":"info","message":"JSON uploaded to IPFS: QmbNvKf7nmkSti1wjKUH1vP9sPXJMS6LghCK2y2fx3h6P3","service":"comic-pad-api","timestamp":"2025-11-17 17:28:11"}
+{"level":"info","message":"CBZ created: uploads\\691b4ca145c4d15b79447b08-ep1.cbz (552632 bytes)","service":"comic-pad-api","timestamp":"2025-11-17 17:28:11"}
+{"level":"info","message":"File uploaded to IPFS: QmVAAx4R44FbAEtff7NcCDJYWbBhZk6Am6eDKyBhca9gwe","service":"comic-pad-api","timestamp":"2025-11-17 17:28:14"}
+{"level":"info","message":"Comic package uploaded successfully: 691b4ca145c4d15b79447b08-ep1","service":"comic-pad-api","timestamp":"2025-11-17 17:28:14"}
+{"level":"info","message":"JSON uploaded to IPFS: QmaHPQ3ApvnFDgBpgP8dbuaa2L4RGnBLrVwBLg1u6SFRbC","service":"comic-pad-api","timestamp":"2025-11-17 17:28:15"}
+{"level":"info","message":"Episode created successfully: 691b4d1f45c4d15b79447b10","service":"comic-pad-api","timestamp":"2025-11-17 17:28:17"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 17:31:31"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 17:31:31"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 18:46:48"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 18:47:06"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-00.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 18:47:06"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 18:47:06"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 18:47:10"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 18:47:10"}
+{"level":"warn","message":"MongoDB disconnected","service":"comic-pad-api","timestamp":"2025-11-17 18:47:10"}
+{"level":"info","message":"Attempting to reconnect...","service":"comic-pad-api","timestamp":"2025-11-17 18:47:10"}
+{"level":"info","message":"MongoDB connection attempt 1/5","service":"comic-pad-api","timestamp":"2025-11-17 18:47:15"}
+{"level":"info","message":"Connection attempt already in progress...","service":"comic-pad-api","timestamp":"2025-11-17 18:47:15"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 18:47:24"}
+{"level":"info","message":"MongoDB connection established","service":"comic-pad-api","timestamp":"2025-11-17 18:47:24"}
+{"level":"info","message":"MongoDB Connected: ac-necythp-shard-00-00.e5wmol7.mongodb.net","service":"comic-pad-api","timestamp":"2025-11-17 18:47:24"}
+{"level":"info","message":"Database Name: hederaPadDB","service":"comic-pad-api","timestamp":"2025-11-17 18:47:24"}
+{"level":"info","message":"Creating episode for collection: 691b4ca145c4d15b79447b08","service":"comic-pad-api","timestamp":"2025-11-17 18:49:08"}
+{"level":"info","message":"Next episode number for collection 691b4ca145c4d15b79447b08: 2","service":"comic-pad-api","timestamp":"2025-11-17 18:49:09"}
+{"level":"info","message":"Creating episode 2 for comic 691b4ca145c4d15b79447b08","service":"comic-pad-api","timestamp":"2025-11-17 18:49:09"}
+{"level":"info","message":"Uploading comic package: 691b4ca145c4d15b79447b08-ep2","service":"comic-pad-api","timestamp":"2025-11-17 18:49:10"}
+{"level":"info","message":"File uploaded to IPFS: QmTLk5gcvRZ2bqk1ovJ3uzAMuJKoDexFzDy1rJS7M8N557","service":"comic-pad-api","timestamp":"2025-11-17 18:49:20"}
+{"level":"info","message":"File uploaded to IPFS: QmWrbVZ1scP6Xqayx6CnACG9yGFFfR4u86oVsw2trupZmA","service":"comic-pad-api","timestamp":"2025-11-17 18:49:24"}
+{"level":"info","message":"Uploaded page 1/2","service":"comic-pad-api","timestamp":"2025-11-17 18:49:24"}
+{"level":"info","message":"File uploaded to IPFS: QmSKwUxXNPKXLPWPbq2pXAGCFHKQjT4EW9iGBpWuTgFgSa","service":"comic-pad-api","timestamp":"2025-11-17 18:49:25"}
+{"level":"info","message":"Uploaded page 2/2","service":"comic-pad-api","timestamp":"2025-11-17 18:49:25"}
+{"level":"info","message":"JSON uploaded to IPFS: QmS7ExiqsGMr91MjYrqA5hBgfqRXPfhbzZW437pQDd2VuH","service":"comic-pad-api","timestamp":"2025-11-17 18:49:27"}
+{"level":"info","message":"CBZ created: uploads\\691b4ca145c4d15b79447b08-ep2.cbz (428292 bytes)","service":"comic-pad-api","timestamp":"2025-11-17 18:49:27"}
+{"level":"info","message":"File uploaded to IPFS: Qma4zciHGKqBkzdzvdCeNSyJ7n9CwxsnWZjYPRqnAMhCoM","service":"comic-pad-api","timestamp":"2025-11-17 18:49:31"}
+{"level":"info","message":"Comic package uploaded successfully: 691b4ca145c4d15b79447b08-ep2","service":"comic-pad-api","timestamp":"2025-11-17 18:49:31"}
+{"level":"info","message":"JSON uploaded to IPFS: QmdbmZw8Qvh4UgXc6veh5ZhtzxeEnAaNW3VMpShKZanRwr","service":"comic-pad-api","timestamp":"2025-11-17 18:49:32"}
+{"level":"info","message":"Episode created successfully: 691b602c45c4d15b79447b20","service":"comic-pad-api","timestamp":"2025-11-17 18:49:34"}
+{"ip":"::1","level":"error","message":"Route /api/v1/comics/691b4d1f45c4d15b79447b10 not found","method":"DELETE","service":"comic-pad-api","stack":"Error: Route /api/v1/comics/691b4d1f45c4d15b79447b10 not found\n    at notFound (file:///C:/Users/farr/Desktop/dev/pADcomikkk/backend/src/middleware/errorHandler.js:103:17)\n    at Layer.handle [as handle_request] (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at trim_prefix (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:328:13)\n    at C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:286:9\n    at Function.process_params (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n    at next (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n    at C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:646:15\n    at next (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:265:14)\n    at Function.handle (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:175:3)\n    at router (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:47:12)","timestamp":"2025-11-17 18:59:12","url":"/api/v1/comics/691b4d1f45c4d15b79447b10"}
+{"ip":"::1","level":"error","message":"Route /api/v1/comics/691b4d1f45c4d15b79447b10 not found","method":"DELETE","service":"comic-pad-api","stack":"Error: Route /api/v1/comics/691b4d1f45c4d15b79447b10 not found\n    at notFound (file:///C:/Users/farr/Desktop/dev/pADcomikkk/backend/src/middleware/errorHandler.js:103:17)\n    at Layer.handle [as handle_request] (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at trim_prefix (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:328:13)\n    at C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:286:9\n    at Function.process_params (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n    at next (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n    at C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:646:15\n    at next (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:265:14)\n    at Function.handle (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:175:3)\n    at router (C:\\Users\\farr\\Desktop\\dev\\pADcomikkk\\backend\\node_modules\\express\\lib\\router\\index.js:47:12)","timestamp":"2025-11-17 18:59:19","url":"/api/v1/comics/691b4d1f45c4d15b79447b10"}

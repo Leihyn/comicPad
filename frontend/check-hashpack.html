@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HashPack Detection Test</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0a0a;
+      color: #00ff00;
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1 { color: #ffff00; }
+    pre {
+      background: #1a1a1a;
+      padding: 15px;
+      border: 2px solid #00ff00;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    .success { color: #00ff00; }
+    .error { color: #ff0000; }
+    .warning { color: #ff9900; }
+    button {
+      background: #ffff00;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+      margin: 10px 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 HashPack Extension Detection</h1>
+
+  <button onclick="runCheck()">Run Detection Check</button>
+  <button onclick="checkAllWallets()">Check All Wallets</button>
+  <button onclick="location.reload()">Refresh Page</button>
+
+  <div id="results"></div>
+
+  <script>
+    function runCheck() {
+      const results = document.getElementById('results');
+      let output = '<pre>';
+
+      output += '<strong>=== HashPack Detection Tests ===</strong>\n\n';
+
+      // Test 1: window.hashpack
+      output += '<strong>Test 1: window.hashpack</strong>\n';
+      if (typeof window.hashpack !== 'undefined') {
+        output += '<span class="success">✅ window.hashpack exists</span>\n';
+        output += 'Type: ' + typeof window.hashpack + '\n';
+        output += 'Keys: ' + Object.keys(window.hashpack).join(', ') + '\n';
+      } else {
+        output += '<span class="error">❌ window.hashpack is undefined</span>\n';
+      }
+      output += '\n';
+
+      // Test 2: window.ethereum
+      output += '<strong>Test 2: window.ethereum</strong>\n';
+      if (typeof window.ethereum !== 'undefined') {
+        output += '<span class="success">✅ window.ethereum exists</span>\n';
+        output += 'isHashPack: ' + (window.ethereum.isHashPack === true ? 'YES' : 'NO') + '\n';
+        output += 'isMetaMask: ' + (window.ethereum.isMetaMask === true ? 'YES' : 'NO') + '\n';
+        if (window.ethereum.providers) {
+          output += 'Multiple providers detected: ' + window.ethereum.providers.length + '\n';
+          window.ethereum.providers.forEach((p, i) => {
+            output += '  Provider ' + i + ': isHashPack=' + (p.isHashPack === true) + '\n';
+          });
+        }
+      } else {
+        output += '<span class="warning">⚠️ window.ethereum is undefined</span>\n';
+      }
+      output += '\n';
+
+      // Test 3: Search window for hash-related keys
+      output += '<strong>Test 3: Window Keys Search</strong>\n';
+      const hashKeys = Object.keys(window).filter(k =>
+        k.toLowerCase().includes('hash') ||
+        k.toLowerCase().includes('wallet') ||
+        k.toLowerCase().includes('hedera')
+      );
+      if (hashKeys.length > 0) {
+        output += '<span class="success">Found ' + hashKeys.length + ' related keys:</span>\n';
+        hashKeys.forEach(k => output += '  - ' + k + '\n');
+      } else {
+        output += '<span class="warning">No hash/wallet/hedera keys found</span>\n';
+      }
+      output += '\n';
+
+      // Test 4: Check for injected scripts
+      output += '<strong>Test 4: Injected Scripts</strong>\n';
+      const scripts = Array.from(document.scripts);
+      const walletScripts = scripts.filter(s =>
+        s.src.includes('hashpack') ||
+        s.src.includes('wallet') ||
+        s.id.includes('hashpack')
+      );
+      if (walletScripts.length > 0) {
+        output += '<span class="success">Found ' + walletScripts.length + ' wallet scripts</span>\n';
+        walletScripts.forEach(s => output += '  - ' + s.src + '\n');
+      } else {
+        output += '<span class="warning">No wallet scripts found</span>\n';
+      }
+      output += '\n';
+
+      // Test 5: Navigator
+      output += '<strong>Test 5: Browser Info</strong>\n';
+      output += 'User Agent: ' + navigator.userAgent + '\n';
+      output += 'Platform: ' + navigator.platform + '\n';
+      output += '\n';
+
+      // Test 6: Recommendations
+      output += '<strong>=== Recommendations ===</strong>\n';
+      if (typeof window.hashpack !== 'undefined') {
+        output += '<span class="success">✅ HashPack detected! Extension is working.</span>\n';
+      } else if (typeof window.ethereum !== 'undefined' && window.ethereum.isHashPack) {
+        output += '<span class="success">✅ HashPack detected via ethereum provider!</span>\n';
+      } else {
+        output += '<span class="error">❌ HashPack NOT detected.</span>\n';
+        output += '\n<strong>Actions to take:</strong>\n';
+        output += '1. Check if HashPack extension is installed in chrome://extensions\n';
+        output += '2. Make sure HashPack is enabled (toggle switch is ON)\n';
+        output += '3. Click the HashPack extension icon and unlock it\n';
+        output += '4. Try refreshing this page after unlocking\n';
+        output += '5. If still not working, try disabling other wallet extensions temporarily\n';
+      }
+
+      output += '</pre>';
+      results.innerHTML = output;
+    }
+
+    function checkAllWallets() {
+      const results = document.getElementById('results');
+      let output = '<pre>';
+
+      output += '<strong>=== All Detected Wallet Extensions ===</strong>\n\n';
+
+      const walletChecks = {
+        'HashPack': window.hashpack !== undefined,
+        'MetaMask': window.ethereum?.isMetaMask === true,
+        'Blade': window.bladeConnect !== undefined,
+        'Kabila': window.kabila !== undefined,
+        'Pelagus': window.pelagus !== undefined,
+        'Ethereum': window.ethereum !== undefined,
+        'Web3': window.web3 !== undefined,
+      };
+
+      Object.entries(walletChecks).forEach(([name, detected]) => {
+        if (detected) {
+          output += '<span class="success">✅ ' + name + ' - DETECTED</span>\n';
+        } else {
+          output += '<span class="error">❌ ' + name + ' - NOT FOUND</span>\n';
+        }
+      });
+
+      output += '\n<strong>Note:</strong> Multiple wallets can cause conflicts.\n';
+      output += 'If you see multiple wallets, try disabling extras temporarily.\n';
+
+      output += '</pre>';
+      results.innerHTML = output;
+    }
+
+    // Auto-run on load
+    setTimeout(() => {
+      runCheck();
+    }, 1000);
+  </script>
+</body>
+</html>

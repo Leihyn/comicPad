@@ -140,7 +140,21 @@ const clearExpiredProposals = () => {
 
 // Detect if HashPack extension is available
 const isHashPackExtensionAvailable = () => {
-  return typeof window !== 'undefined' && window.hashpack !== undefined;
+  if (typeof window === 'undefined') return false;
+
+  // Check multiple ways HashPack might be available
+  const hasHashPack = window.hashpack !== undefined;
+  const hasHashPackProvider = window.ethereum?.isHashPack === true;
+  const hasHashPackInjected = document.querySelector('[data-hashpack]') !== null;
+
+  console.log('🔍 HashPack detection:', {
+    'window.hashpack': window.hashpack !== undefined,
+    'window.ethereum?.isHashPack': window.ethereum?.isHashPack === true,
+    'DOM injection': hasHashPackInjected,
+    'window keys': Object.keys(window).filter(k => k.toLowerCase().includes('hash')).join(', ')
+  });
+
+  return hasHashPack || hasHashPackProvider || hasHashPackInjected;
 };
 
 // Try to connect using HashPack extension directly (fallback method)
@@ -224,13 +238,20 @@ export const openHashPackModal = async () => {
       connectorMethods: typeof connector.connectExtension
     });
 
-    // If extension is available, try direct connection first
-    if (hasExtension && typeof connector.connectExtension === 'function') {
+    // ALWAYS try extension connection first (even if detection is uncertain)
+    if (typeof connector.connectExtension === 'function') {
       try {
         console.log('🔵 Attempting direct extension connection...');
         toast.loading('Connecting to HashPack extension...', { id: 'wallet-connect' });
 
-        const session = await connector.connectExtension('hashpack');
+        // Try connecting with a short timeout
+        const session = await Promise.race([
+          connector.connectExtension('hashpack'),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Extension timeout')), 5000)
+          )
+        ]);
+
         console.log('✅ Connected via extension!', session);
 
         const accountId = connector.signers[0]?.getAccountId()?.toString();
@@ -240,14 +261,15 @@ export const openHashPackModal = async () => {
       } catch (extError) {
         console.warn('⚠️ Extension connection failed:', extError.message);
         console.log('🔄 Falling back to QR code modal...');
+
+        if (!hasExtension) {
+          toast('HashPack extension not detected. Opening QR code for mobile...', {
+            id: 'wallet-connect',
+            icon: 'ℹ️',
+            duration: 3000
+          });
+        }
       }
-    } else if (!hasExtension) {
-      console.log('ℹ️ HashPack extension not found - will use QR code');
-      toast('HashPack extension not found. You can scan QR code with mobile app.', {
-        id: 'wallet-connect',
-        icon: 'ℹ️',
-        duration: 3000
-      });
     }
 
     // Fallback to modal method (QR code)

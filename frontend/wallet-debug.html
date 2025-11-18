@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallet Connection Debugger</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0a0a;
+      color: #00ff00;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 { color: #ffff00; }
+    .section {
+      background: #1a1a1a;
+      border: 2px solid #00ff00;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 8px;
+    }
+    button {
+      background: #ffff00;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+      margin: 5px;
+    }
+    button:hover { background: #ff9900; }
+    .status { margin: 10px 0; }
+    .error { color: #ff0000; }
+    .success { color: #00ff00; }
+    .warning { color: #ff9900; }
+    pre {
+      background: #000;
+      padding: 10px;
+      overflow-x: auto;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Wallet Connection Debugger</h1>
+
+  <div class="section">
+    <h2>Step 1: Environment Check</h2>
+    <button onclick="checkEnvironment()">Run Environment Check</button>
+    <div id="env-results"></div>
+  </div>
+
+  <div class="section">
+    <h2>Step 2: Clear WalletConnect Sessions</h2>
+    <button onclick="clearSessions()">Clear All Sessions</button>
+    <div id="clear-results"></div>
+  </div>
+
+  <div class="section">
+    <h2>Step 3: Test Connection</h2>
+    <button onclick="testConnection()">Test Wallet Connection</button>
+    <div id="test-results"></div>
+  </div>
+
+  <div class="section">
+    <h2>Step 4: View localStorage</h2>
+    <button onclick="viewStorage()">View Storage Data</button>
+    <div id="storage-results"></div>
+  </div>
+
+  <script>
+    function checkEnvironment() {
+      const results = document.getElementById('env-results');
+      let html = '<div class="status">';
+
+      // Check HashPack extension
+      const hasHashPack = typeof window?.hashpack !== 'undefined';
+      html += hasHashPack
+        ? '<div class="success">✅ HashPack extension detected</div>'
+        : '<div class="error">❌ HashPack extension NOT found</div>';
+
+      // Check window object
+      html += '<div class="success">✅ Window object available</div>';
+
+      // Check localStorage
+      try {
+        localStorage.setItem('test', 'test');
+        localStorage.removeItem('test');
+        html += '<div class="success">✅ localStorage working</div>';
+      } catch (e) {
+        html += '<div class="error">❌ localStorage error: ' + e.message + '</div>';
+      }
+
+      // Check for WalletConnect data
+      let wcKeys = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('wc@2') || key.startsWith('wc_'))) {
+          wcKeys++;
+        }
+      }
+      html += wcKeys > 0
+        ? '<div class="warning">⚠️ Found ' + wcKeys + ' WalletConnect keys (may be stale)</div>'
+        : '<div class="success">✅ No stale WalletConnect sessions</div>';
+
+      // Browser info
+      html += '<div class="success">✅ Browser: ' + navigator.userAgent.split(' ').pop() + '</div>';
+
+      // Network check
+      html += navigator.onLine
+        ? '<div class="success">✅ Network online</div>'
+        : '<div class="error">❌ Network offline</div>';
+
+      html += '</div>';
+      results.innerHTML = html;
+    }
+
+    function clearSessions() {
+      const results = document.getElementById('clear-results');
+      let removed = [];
+
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('wc@2') || key.startsWith('wc_') || key.includes('walletconnect'))) {
+          localStorage.removeItem(key);
+          removed.push(key);
+        }
+      }
+
+      if (removed.length > 0) {
+        results.innerHTML = `
+          <div class="success">✅ Cleared ${removed.length} WalletConnect session(s)</div>
+          <pre>${removed.join('\n')}</pre>
+          <div class="warning">⚠️ Please refresh the page and try connecting again</div>
+          <button onclick="location.reload()">Refresh Page</button>
+        `;
+      } else {
+        results.innerHTML = '<div class="success">✅ No sessions to clear</div>';
+      }
+    }
+
+    async function testConnection() {
+      const results = document.getElementById('test-results');
+      results.innerHTML = '<div class="warning">⏳ Testing connection...</div>';
+
+      try {
+        // Check if HashPack is available
+        if (typeof window?.hashpack === 'undefined') {
+          throw new Error('HashPack extension not detected');
+        }
+
+        results.innerHTML = `
+          <div class="success">✅ HashPack extension found</div>
+          <div class="warning">ℹ️ To test full connection, please:</div>
+          <ol>
+            <li>Make sure HashPack is unlocked</li>
+            <li>Go back to your app at <a href="http://localhost:5173" target="_blank">http://localhost:5173</a></li>
+            <li>Click "Connect Wallet"</li>
+            <li>Check browser console (F12) for detailed logs</li>
+          </ol>
+        `;
+      } catch (error) {
+        results.innerHTML = `
+          <div class="error">❌ Test failed: ${error.message}</div>
+          <div class="warning">
+            <strong>Next steps:</strong><br>
+            1. Install HashPack from <a href="https://www.hashpack.app/" target="_blank">hashpack.app</a><br>
+            2. Create a wallet and unlock it<br>
+            3. Run this test again
+          </div>
+        `;
+      }
+    }
+
+    function viewStorage() {
+      const results = document.getElementById('storage-results');
+      let html = '<pre>';
+
+      // Show wallet-related keys
+      const walletKeys = ['wallet', 'hashconnect_pairing', 'token', 'user'];
+      walletKeys.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value) {
+          html += `<strong>${key}:</strong>\n${value.substring(0, 200)}${value.length > 200 ? '...' : ''}\n\n`;
+        }
+      });
+
+      // Show WalletConnect keys
+      const wcKeys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('wc@2') || key.startsWith('wc_'))) {
+          wcKeys.push(key);
+        }
+      }
+
+      if (wcKeys.length > 0) {
+        html += '<strong>WalletConnect keys:</strong>\n';
+        wcKeys.forEach(key => html += `${key}\n`);
+      }
+
+      html += '</pre>';
+      results.innerHTML = html;
+    }
+
+    // Auto-run environment check on load
+    window.onload = () => {
+      checkEnvironment();
+    };
+  </script>
+</body>
+</html>
