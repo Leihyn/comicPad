@@ -344,5 +344,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **OpenZeppelin** - For secure smart contract libraries
 
 ---
-
-**Built with ❤️ for the comic book community**
