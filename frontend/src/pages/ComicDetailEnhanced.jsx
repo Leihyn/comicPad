@@ -70,26 +70,24 @@ export default function ComicDetailEnhanced() {
     setMinting(true);
     try {
       const token = localStorage.getItem('token');
-      toast.loading(`Minting ${comic.supply} NFT(s)...`, { id: 'mint' });
+      toast.loading(`Minting ${comic.supply} NFT(s) using backend...`, { id: 'mint' });
 
-      const metadataArray = Array(comic.supply).fill(comic.content.metadataUri);
-      const tokenId = comic.collection?.collectionTokenId || comic.collection?.tokenId;
-      const mintResult = await mintNFTs(tokenId, metadataArray);
-
-      await axios.post(
-        `${API_BASE}/comics/${id}/mint`,
+      // DEMO MODE: Use backend minting to bypass HashPack wallet popup issues
+      const response = await axios.post(
+        `${API_BASE}/comics/episodes/${id}/mint-backend`,
         {
-          serialNumbers: mintResult.serials,
-          transactionId: mintResult.transactionId
+          quantity: comic.supply || 1
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
+      console.log('✅ Backend minting response:', response.data);
 
       toast.success(`Successfully minted ${comic.supply} NFT(s)! 🎉`, { id: 'mint' });
       await loadComic();
     } catch (error) {
       console.error('Mint error:', error);
-      toast.error(error.message || 'Failed to mint NFTs', { id: 'mint' });
+      toast.error(error.response?.data?.message || error.message || 'Failed to mint NFTs', { id: 'mint' });
     } finally {
       setMinting(false);
     }

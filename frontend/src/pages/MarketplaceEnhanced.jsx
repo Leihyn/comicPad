@@ -112,42 +112,24 @@ export default function MarketplaceEnhanced() {
     if (!selectedListing) return;
 
     try {
-      if (!hashPackWallet.isConnected()) {
-        toast.error('Please connect your wallet first', { id: 'buy-nft' });
-        return;
-      }
-
+      // DEMO MODE: Skip wallet connection check - backend handles everything
       const price = selectedListing.price?.amount || 0;
       const sellerAccountId = AccountId.fromString(selectedListing.sellerAccountId);
       const tokenId = TokenId.fromString(selectedListing.tokenId);
       const serialNumber = selectedListing.serialNumber;
 
-      console.log('🛒 Starting atomic purchase transaction:', {
+      console.log('🛒 DEMO MODE: Processing purchase via backend:', {
         price,
         seller: sellerAccountId.toString(),
         tokenId: tokenId.toString(),
         serialNumber
       });
 
-      toast.loading('Processing purchase... (Payment + NFT Transfer)', { id: 'buy-nft' });
+      toast.loading('Processing purchase (demo mode - backend handling)...', { id: 'buy-nft' });
 
-      // Execute atomic transaction: Payment + NFT Transfer in ONE transaction
-      // This uses the seller's allowance that was granted when they listed the NFT
-      const txResult = await hashPackWallet.transferNFT(
-        sellerAccountId,
-        tokenId,
-        serialNumber,
-        Hbar.from(price)
-      );
-
-      console.log('✅ Atomic transaction completed:', txResult);
-
-      toast.loading('Updating marketplace records...', { id: 'buy-nft' });
-
-      // Step 2: Call backend to update the database
-      const result = await marketplaceService.buyNFT(selectedListing._id, {
-        paymentTransactionId: txResult.toString()
-      });
+      // DEMO MODE: Skip wallet transaction, let backend handle everything
+      // Backend will transfer NFT from operator account to buyer
+      const result = await marketplaceService.buyNFT(selectedListing._id);
 
       console.log('✅ Purchase completed:', result);
 

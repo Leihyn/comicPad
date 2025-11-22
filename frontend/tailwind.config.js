@@ -8,20 +8,31 @@ export default {
     extend: {
       colors: {
         comic: {
-          yellow: '#FFD700',
-          red: '#FF0000',
-          blue: '#0066FF',
-          purple: '#9B30FF',
-          green: '#00FF00',
-          orange: '#FF8C00',
-          pink: '#FF69B4',
-          cyan: '#00FFFF',
+          yellow: '#E8D7BF',      // beige/cream (replacing yellow)
+          red: '#A85858',         // desaturated red
+          blue: '#2C3E62',        // dark blue/navy
+          purple: '#6B5B7F',      // desaturated purple
+          green: '#5C7F6B',       // desaturated green
+          orange: '#B8886B',      // desaturated orange/tan
+          pink: '#9F7B7B',        // desaturated pink/mauve
+          cyan: '#5C7A8C',        // desaturated cyan/slate
         },
         dark: {
-          900: '#0A0A0A',
-          800: '#1A1A1A',
-          700: '#2A2A2A',
-          600: '#3A3A3A',
+          900: '#1A1A1C',         // charcoal black (darkest)
+          800: '#2A2A2E',         // charcoal black (lighter)
+          700: '#3A3A40',         // charcoal gray
+          600: '#4A4A52',         // medium charcoal
+        },
+        navy: {
+          900: '#1A2332',         // deep navy
+          800: '#2C3E62',         // navy
+          700: '#3D5A80',         // lighter navy
+          600: '#5C7A9E',         // slate blue
+        },
+        cream: {
+          100: '#F5EFE6',         // lightest cream
+          200: '#E8D7BF',         // cream
+          300: '#D4C4AF',         // darker cream
         }
       },
       fontFamily: {
@@ -53,4 +64,3 @@ export default {
   },
   plugins: [],
 }
-

@@ -93,47 +93,46 @@ export default function NFTActionModal({ comic, isOpen, onClose, onSuccess }) {
       console.log('👤 Is creator check:', { creatorId, userId: user._id, isCreator });
 
       let ownedNFT = comic.nfts?.find(nft => {
-        // Method 1: Check by user ID
-        const nftOwnerId = nft.owner?._id || nft.owner;
-        const userIdMatch = String(nftOwnerId) === String(user._id);
-
-        // Method 2: Check by wallet address
+        // Method 1: Check by wallet address (most reliable for NFT ownership)
         const nftWallet = nft.owner; // mintedNFTs stores Hedera account as 'owner'
         const walletMatch = userWallet && nftWallet && String(nftWallet) === String(userWallet);
+
+        // Method 2: Check by user ID (for database reference)
+        const nftOwnerId = nft.owner?._id || nft.owner;
+        const userIdMatch = String(nftOwnerId) === String(user._id);
 
         console.log(`NFT #${nft.serialNumber}: owner=${nft.owner}, nftOwnerId=${nftOwnerId}`);
         console.log(`  User wallet: ${userWallet}, NFT wallet: ${nftWallet}`);
         console.log(`  User ID match: ${userIdMatch}, Wallet match: ${walletMatch}`);
 
-        return userIdMatch || walletMatch;
+        return walletMatch || userIdMatch;
       });
 
       // Method 3: If user is the creator and has minted NFTs, they own ALL of them
-      if (!ownedNFT && isCreator && comic.minted > 0) {
+      // This handles the case where NFTs were just minted and owner field might not be set yet
+      if (!ownedNFT && isCreator && comic.nfts && comic.nfts.length > 0) {
         console.log('✅ User is creator, using first minted NFT');
-        // Create a mock NFT for the creator
-        ownedNFT = comic.nfts?.[0] || { serialNumber: 1, owner: userWallet };
+        ownedNFT = comic.nfts[0];
       }
 
       if (!ownedNFT) {
         console.error('❌ No owned NFT found');
         console.error('User ID:', user._id);
+        console.error('User Wallet:', userWallet);
+        console.error('Is Creator:', isCreator);
         console.error('NFTs array:', comic.nfts);
-        console.error('Creator check failed:', {
-          creatorId,
-          userId: user._id,
-          isCreator,
-          mintedCount: comic.minted,
-          nftsLength: comic.nfts?.length
-        });
 
-        // More specific error messages
+        // More specific and helpful error messages
         if (!comic.nfts || comic.nfts.length === 0) {
           toast.error('No NFTs found for this comic. Please mint some first.');
-        } else if (!isCreator) {
-          toast.error(`You are not the creator. Creator ID: ${creatorId}, Your ID: ${user._id}`);
         } else {
-          toast.error('You do not own any NFT from this comic');
+          // Show which accounts own the NFTs
+          const nftOwners = comic.nfts.map(nft => nft.owner).join(', ');
+          toast.error(`You don't own any NFTs from this comic. Your wallet: ${userWallet}. NFT owners: ${nftOwners}`);
+
+          if (!isCreator) {
+            console.warn(`User is not the creator. Creator ID: ${creatorId}, User ID: ${user._id}`);
+          }
         }
         return;
       }
@@ -158,25 +157,10 @@ export default function NFTActionModal({ comic, isOpen, onClose, onSuccess }) {
         return;
       }
 
-      // Step 2: Approve NFT allowance for marketplace operator
-      console.log('🔐 Approving NFT for marketplace operator...');
-      toast.loading('Please approve marketplace operator in HashPack...', { id: 'approve-nft' });
-
-      try {
-        if (!comic.collectionTokenId) {
-          throw new Error('Comic missing collection token ID');
-        }
-
-        const tokenId = TokenId.fromString(comic.collectionTokenId);
-        await hashPackWallet.approveNFTAllowance(tokenId, ownedNFT.serialNumber, operatorAccountId);
-
-        console.log('✅ NFT allowance approved for marketplace operator');
-        toast.success('NFT approved for marketplace!', { id: 'approve-nft' });
-      } catch (approvalError) {
-        console.error('❌ NFT approval failed:', approvalError);
-        toast.error('Failed to approve NFT. You must approve the transfer to list on marketplace.', { id: 'approve-nft' });
-        return;
-      }
+      // DEMO MODE: Skip NFT approval - operator already owns NFTs
+      // In production, you would approve the marketplace to transfer your NFT
+      console.log('🎬 DEMO MODE: Skipping NFT approval (operator already owns NFTs)');
+      toast.success('Ready to list (demo mode - no approval needed)', { id: 'approve-nft' });
 
       // Step 2: Create marketplace listing
       console.log('📝 Creating marketplace listing...');
@@ -306,25 +290,10 @@ export default function NFTActionModal({ comic, isOpen, onClose, onSuccess }) {
         return;
       }
 
-      // Step 2: Approve NFT allowance for marketplace operator
-      console.log('🔐 Approving NFT for marketplace operator (auction)...');
-      toast.loading('Please approve marketplace operator in HashPack...', { id: 'approve-nft-auction' });
-
-      try {
-        if (!comic.collectionTokenId) {
-          throw new Error('Comic missing collection token ID');
-        }
-
-        const tokenId = TokenId.fromString(comic.collectionTokenId);
-        await hashPackWallet.approveNFTAllowance(tokenId, ownedNFT.serialNumber, operatorAccountId);
-
-        console.log('✅ NFT allowance approved for marketplace operator (auction)');
-        toast.success('NFT approved for auction!', { id: 'approve-nft-auction' });
-      } catch (approvalError) {
-        console.error('❌ NFT approval failed:', approvalError);
-        toast.error('Failed to approve NFT. You must approve the transfer to start auction.', { id: 'approve-nft-auction' });
-        return;
-      }
+      // DEMO MODE: Skip NFT approval - operator already owns NFTs
+      // In production, you would approve the marketplace to transfer your NFT
+      console.log('🎬 DEMO MODE: Skipping NFT approval for auction (operator already owns NFTs)');
+      toast.success('Ready to start auction (demo mode - no approval needed)', { id: 'approve-nft-auction' });
 
       // Step 2: Create auction listing
       console.log('📝 Creating auction listing...');

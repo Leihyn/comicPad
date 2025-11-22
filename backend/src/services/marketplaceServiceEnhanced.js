@@ -33,12 +33,17 @@ class MarketplaceServiceEnhanced {
       }
 
       // Verify ownership
-      const nft = episode.mintedNFTs.find(n =>
-        n.serialNumber === serialNumber && n.owner === accountId
-      );
+      // DEMO MODE: Check if NFT exists and was created by this user
+      // (Actual ownership is with operator account for demo)
+      const nft = episode.mintedNFTs.find(n => n.serialNumber === serialNumber);
 
       if (!nft) {
-        throw new Error('NFT not owned by user');
+        throw new Error('NFT not found');
+      }
+
+      // Verify the user created this episode (even though operator owns NFT)
+      if (episode.creator.toString() !== userId.toString()) {
+        throw new Error('Not authorized to list this NFT');
       }
 
       // Create listing
@@ -98,12 +103,17 @@ class MarketplaceServiceEnhanced {
       }
 
       // Verify ownership
-      const nft = episode.mintedNFTs.find(n =>
-        n.serialNumber === serialNumber && n.owner === accountId
-      );
+      // DEMO MODE: Check if NFT exists and was created by this user
+      // (Actual ownership is with operator account for demo)
+      const nft = episode.mintedNFTs.find(n => n.serialNumber === serialNumber);
 
       if (!nft) {
-        throw new Error('NFT not owned by user');
+        throw new Error('NFT not found');
+      }
+
+      // Verify the user created this episode (even though operator owns NFT)
+      if (episode.creator.toString() !== userId.toString()) {
+        throw new Error('Not authorized to list this NFT');
       }
 
       // Create auction listing

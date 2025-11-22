@@ -119,7 +119,7 @@ class HederaService {
       creatorAccountId,
       royaltyPercentage = 10,
       maxSupply = 0,
-      creatorPublicKey // Optional: user's public key
+      creatorPublicKey // Optional: user's public key (not used for supply key)
     } = options;
 
     try {
@@ -127,37 +127,33 @@ class HederaService {
 
       const creatorAccount = AccountId.fromString(creatorAccountId);
 
-      // Get creator's public key for supply key
-      let supplyKey;
-      if (creatorPublicKey) {
-        supplyKey = PublicKey.fromString(creatorPublicKey);
-        logger.info('Using provided creator public key as supply key');
-      } else {
-        logger.info('Fetching creator public key from mirror node...');
-        supplyKey = await this.getAccountPublicKey(creatorAccountId);
-      }
+      // IMPORTANT: Use operator's key as supply key so the backend can mint
+      // The operator will mint NFTs on behalf of creators
+      // Royalties still go to the creator via CustomRoyaltyFee
+      const supplyKey = this.operatorKey.publicKey;
+      logger.info('Using operator public key as supply key for backend minting');
 
-      // Create custom royalty fee
+      // Create custom royalty fee - creator gets royalties on secondary sales
       const royaltyFee = new CustomRoyaltyFee()
         .setNumerator(royaltyPercentage)
         .setDenominator(100)
-        .setFeeCollectorAccountId(creatorAccount)
+        .setFeeCollectorAccountId(creatorAccount) // Creator receives royalties
         .setFallbackFee(new CustomFixedFee().setHbarAmount(new Hbar(1)));
 
       // Create token transaction
-      // Treasury must be the operator account (who signs the transaction)
-      // Supply key will be the creator's key (so they can mint)
-      // Royalties will still go to the creator via royaltyFee
+      // Treasury: operator account (holds initial NFTs)
+      // Supply key: operator's key (allows backend to mint)
+      // Royalties: go to creator via royaltyFee
       const transaction = new TokenCreateTransaction()
         .setTokenName(name)
         .setTokenSymbol(symbol)
         .setTokenType(TokenType.NonFungibleUnique)
         .setDecimals(0)
         .setInitialSupply(0)
-        .setTreasuryAccountId(this.operatorId) // Use operator as treasury
+        .setTreasuryAccountId(this.operatorId) // Operator as treasury
         .setSupplyType(maxSupply > 0 ? TokenSupplyType.Finite : TokenSupplyType.Infinite)
         .setMaxSupply(maxSupply)
-        .setSupplyKey(supplyKey) // Use creator's public key so they can mint
+        .setSupplyKey(supplyKey) // Operator's public key so backend can mint
         .setCustomFees([royaltyFee])
         .setAdminKey(this.operatorKey)
         .setFreezeDefault(false);
@@ -168,13 +164,14 @@ class HederaService {
       const tokenId = receipt.tokenId.toString();
 
       logger.info(`NFT collection created: ${tokenId}`);
-      logger.info(`Supply key set to creator's public key: ${supplyKey.toString()}`);
+      logger.info(`Treasury and supply key: operator (${this.operatorId.toString()})`);
+      logger.info(`Royalty collector: creator (${creatorAccountId})`);
 
       return {
         tokenId,
         treasuryAccountId: this.operatorId.toString(),
         creatorAccountId: creatorAccountId, // Original creator for royalties
-        supplyKey: supplyKey.toString(), // Creator's public key (so they can mint)
+        supplyKey: supplyKey.toString(), // Operator's public key
         transactionId: txResponse.transactionId.toString(),
         explorerUrl: this.getExplorerUrl('token', tokenId)
       };

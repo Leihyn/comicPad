@@ -138,8 +138,7 @@ export default function Home() {
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto font-bold">
-              The ultimate decentralized platform for comic creators and collectors. 
-              Create, mint, and trade comic book NFTs with <span className="text-comic-yellow">ZERO GAS FEES!</span>
+              Create and trade comic NFTs with <span className="text-comic-yellow">zero gas fees</span>
             </p>
             
             {/* CTA Buttons */}
@@ -280,25 +279,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Tagline */}
       <section className="container mx-auto px-6 py-20">
-        <div className="comic-panel p-12 border-animated">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            {[
-              { label: 'Comics Published', value: '1,234', icon: '📚' },
-              { label: 'Total Sales', value: '50K HBAR', icon: '💰' },
-              { label: 'Creators', value: '567', icon: '✍️' },
-              { label: 'Collectors', value: '2,890', icon: '👥' }
-            ].map((stat, i) => (
-              <div key={i} className="group hover:scale-110 transition">
-                <div className="text-5xl mb-2">{stat.icon}</div>
-                <div className="text-4xl font-comic text-comic-yellow mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-gray-400 font-bold uppercase text-sm">{stat.label}</div>
-              </div>
-            ))}
-          </div>
+        <div className="comic-panel p-12 text-center">
+          <p className="text-3xl md:text-4xl font-comic text-comic-yellow">
+            Your comics, your rights, forever on the blockchain
+          </p>
         </div>
       </section>
 
@@ -310,9 +296,9 @@ export default function Home() {
         
         <div className="grid md:grid-cols-3 gap-8">
           {[
-            { step: '1', title: 'CONNECT WALLET', desc: 'Link your HashPack wallet to get started', emoji: '🔗' },
-            { step: '2', title: 'CREATE OR COLLECT', desc: 'Publish your comics or discover amazing art', emoji: '🎨' },
-            { step: '3', title: 'TRADE & EARN', desc: 'Buy, sell, and earn royalties forever', emoji: '💎' }
+            { step: '1', title: 'CONNECT', desc: 'Link wallet', emoji: '🔗' },
+            { step: '2', title: 'CREATE', desc: 'Publish comics', emoji: '🎨' },
+            { step: '3', title: 'TRADE', desc: 'Buy and sell', emoji: '💎' }
           ].map((item, i) => (
             <div key={i} className="text-center">
               <div className="w-20 h-20 bg-gradient-to-br from-comic-purple to-comic-pink rounded-full flex items-center justify-center mx-auto mb-6 text-4xl font-comic text-white border-4 border-dark-900 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.8)]">

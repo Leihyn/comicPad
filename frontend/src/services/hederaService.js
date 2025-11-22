@@ -67,6 +67,7 @@ export async function createNFTCollection(collectionData) {
         .setSupplyType(TokenSupplyType.Infinite)
         .setTreasuryAccountId(treasuryAccount)
         .setSupplyKey(publicKey) // Set the user's public key as supply key
+        .setTransactionValidDuration(120) // Maximum allowed: 120 seconds on testnet
         .setMaxTransactionFee(new Hbar(20)); // Increased fee for token creation
 
       console.log('🔧 Freezing transaction for signing...');
@@ -269,8 +270,8 @@ export async function mintNFTs(tokenId, metadataURIs) {
           const mintTx = new TokenMintTransaction()
             .setTokenId(tokenId)
             .setMetadata([metadataBytes])
-            .setMaxTransactionFee(new Hbar(10))
-            .setTransactionValidDuration(180); // 3 minutes validity
+            .setTransactionValidDuration(120) // Maximum allowed: 120 seconds on testnet
+            .setMaxTransactionFee(new Hbar(10));
 
           console.log('✅ Transaction built successfully');
           console.log('🔧 Freezing transaction with signer...');

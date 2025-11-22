@@ -18,6 +18,7 @@ import {
 // Import the working createListing from old controller for backward compatibility
 import { createListing as createListingOld } from '../controllers/marketplaceController.js';
 import { protect } from '../middleware/auth.js';
+import { demoProtect } from '../middleware/demoAuth.js'; // Demo mode
 
 const router = express.Router();
 
@@ -35,18 +36,18 @@ router.get('/operator', (req, res) => {
   });
 });
 
-// Protected routes
-router.post('/listings', protect, createListing);
-router.post('/list', protect, createListingOld); // Alias route for frontend compatibility
-router.post('/auctions', protect, createAuction);
-router.post('/auctions/:listingId/bid', protect, placeBid);
-router.post('/listings/:listingId/buy', protect, buyNFT);
-router.post('/auctions/:listingId/complete', protect, completeAuction);
-router.delete('/listings/:listingId', protect, cancelListing);
-router.get('/users/me/listings', protect, getMyListings);
+// Protected routes - DEMO MODE
+router.post('/listings', demoProtect, createListing); // DEMO MODE
+router.post('/list', demoProtect, createListingOld); // Alias route for frontend compatibility - DEMO MODE
+router.post('/auctions', demoProtect, createAuction); // DEMO MODE
+router.post('/auctions/:listingId/bid', demoProtect, placeBid); // DEMO MODE
+router.post('/listings/:listingId/buy', demoProtect, buyNFT); // DEMO MODE
+router.post('/auctions/:listingId/complete', demoProtect, completeAuction); // DEMO MODE
+router.delete('/listings/:listingId', demoProtect, cancelListing); // DEMO MODE
+router.get('/users/me/listings', demoProtect, getMyListings); // DEMO MODE
 
-// Transaction history routes
-router.get('/history', protect, getMarketplaceHistory);
-router.get('/history/:transactionId', protect, getTransaction);
+// Transaction history routes - DEMO MODE
+router.get('/history', demoProtect, getMarketplaceHistory); // DEMO MODE
+router.get('/history/:transactionId', demoProtect, getTransaction); // DEMO MODE
 
 export default router;

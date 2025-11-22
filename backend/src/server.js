@@ -27,7 +27,7 @@ console.log('HEDERA_OPERATOR_KEY preview:', process.env.HEDERA_OPERATOR_KEY?.sub
 console.log('---\n');
 
 
-import { connectDB } from './config/database.js';
+import { connectDB } from './config/databaseDemo.js'; // Use in-memory database for demo
 import { connectRedis } from './config/redis.js';
 import logger from './utils/logger.js';
 import errorHandler, { notFound } from './middleware/errorHandler.js';
@@ -166,4 +166,5 @@ process.on('SIGTERM', () => {
 });
 
 export default app;
+
 

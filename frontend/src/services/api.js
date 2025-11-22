@@ -17,6 +17,14 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Add wallet account ID to headers if available
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const walletAccount = user.wallet?.accountId || user.hederaAccount?.accountId;
+    if (walletAccount) {
+      config.headers['x-wallet-account'] = walletAccount;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

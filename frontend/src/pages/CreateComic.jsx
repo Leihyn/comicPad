@@ -264,45 +264,14 @@ export default function CreateComic() {
 
     try {
       const token = localStorage.getItem('token');
-
-      // Step 1: Get episode data from backend (createdComicId is actually an episode ID)
-      toast.loading('Fetching episode metadata...', { id: 'mint' });
-      const episodeResponse = await axios.get(`${API_BASE}/comics/episodes/${createdComicId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      const episode = episodeResponse.data.data;
-      const metadataUri = episode.content.metadataUri;
       const supply = parseInt(comicData.supply);
 
-      // Step 2: Mint NFTs on Hedera using user's wallet (ONE AT A TIME)
-      toast.loading(`Minting ${supply} NFT(s)... (sign each transaction - this may take a while)`, { id: 'mint' });
-
-      // Create array of metadata URIs (same URI for all copies)
-      const metadataArray = Array(supply).fill(metadataUri);
-
-      // Call frontend Hedera service to mint with wallet (handles batching internally)
-      // Use collectionTokenId from backend (not tokenId)
-      const tokenId = selectedCollection.collectionTokenId || selectedCollection.tokenId;
-
-      if (!tokenId) {
-        throw new Error('Collection token ID not found. Please try recreating the collection.');
-      }
-
-      console.log('Using token ID:', tokenId);
-      const mintResult = await mintNFTs(tokenId, metadataArray);
-
-      toast.success(`All ${supply} NFT(s) minted successfully! ✅`, { id: 'mint' });
-
-      // Step 3: Save mint results to backend
-      toast.loading('Saving mint results...', { id: 'mint' });
+      // DEMO MODE: Use backend minting (reliable, instant, no wallet issues)
+      toast.loading(`Minting ${supply} NFT(s)...`, { id: 'mint' });
 
       const response = await axios.post(
-        `${API_BASE}/comics/episodes/${createdComicId}/mint`,
-        {
-          serialNumbers: mintResult.serials,
-          transactionId: mintResult.transactionId
-        },
+        `${API_BASE}/comics/episodes/${createdComicId}/mint-backend`,
+        { quantity: supply },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

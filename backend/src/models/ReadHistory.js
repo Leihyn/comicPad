@@ -28,7 +28,7 @@ const readHistorySchema = new mongoose.Schema({
   // Access Details
   accessType: {
     type: String,
-    enum: ['nft-owner', 'paid-access', 'free', 'preview'],
+    enum: ['nft-owner', 'paid-access', 'free', 'preview', 'creator'],
     required: true
   },
 

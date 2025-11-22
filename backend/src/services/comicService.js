@@ -401,11 +401,11 @@ class ComicService {
         // Find owned NFT
         const ownedNFT = episode.mintedNFTs.find(nft => nft.owner === userAccountId);
         if (ownedNFT || isCreator) {
-          accessType = 'nft-owner';
+          accessType = 'nft-owner'; // Both NFT owners and creators get full access
           nftOwnership = ownedNFT ? {
             tokenId: episode.collectionTokenId,
             serialNumber: ownedNFT.serialNumber
-          } : { tokenId: episode.collectionTokenId, serialNumber: 'creator' };
+          } : null; // Creators don't have NFT serial - set to null
         }
       }
 

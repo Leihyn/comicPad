@@ -6,7 +6,7 @@
 
 @layer base {
   body {
-    @apply bg-[#0A0A0A] text-white;
+    @apply bg-dark-900 text-cream-100;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 }
@@ -14,21 +14,21 @@
 @layer components {
   /* Comic-style buttons */
   .btn-comic {
-    @apply px-8 py-4 bg-gradient-to-br from-comic-yellow to-comic-orange text-dark-900 font-comic text-lg font-bold rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.8)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 border-4 border-dark-900;
+    @apply px-8 py-4 bg-gradient-to-br from-comic-yellow to-comic-orange text-dark-900 font-comic text-lg font-bold rounded-lg shadow-[4px_4px_0px_0px_rgba(26,26,28,0.8)] hover:shadow-[6px_6px_0px_0px_rgba(26,26,28,0.8)] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all duration-200 border-4 border-dark-700;
   }
 
   .btn-comic-outline {
-    @apply px-8 py-4 bg-transparent text-comic-yellow font-comic text-lg font-bold rounded-lg border-4 border-comic-yellow shadow-[4px_4px_0px_0px_rgba(255,215,0,0.4)] hover:bg-comic-yellow hover:text-dark-900 transition-all duration-200;
+    @apply px-8 py-4 bg-transparent text-comic-yellow font-comic text-lg font-bold rounded-lg border-4 border-comic-yellow shadow-[4px_4px_0px_0px_rgba(232,215,191,0.4)] hover:bg-comic-yellow hover:text-dark-900 transition-all duration-200;
   }
 
   /* Comic panel styling */
   .comic-panel {
-    @apply bg-dark-800 rounded-2xl border-4 border-dark-600 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] transition-all duration-300;
+    @apply bg-dark-800 rounded-2xl border-4 border-dark-600 shadow-[8px_8px_0px_0px_rgba(26,26,28,0.8)] transition-all duration-300;
   }
 
   /* Badge styling */
   .badge-pow {
-    @apply inline-flex items-center px-6 py-3 bg-comic-red text-white font-comic text-sm rounded-full border-4 border-dark-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)];
+    @apply inline-flex items-center px-6 py-3 bg-comic-red text-cream-100 font-comic text-sm rounded-full border-4 border-dark-900 shadow-[4px_4px_0px_0px_rgba(26,26,28,0.8)];
   }
 
   /* Animated border */
@@ -40,7 +40,7 @@
     content: '';
     position: absolute;
     inset: -4px;
-    background: linear-gradient(45deg, #FFD700, #FF0000, #0066FF, #FFD700);
+    background: linear-gradient(45deg, #E8D7BF, #A85858, #2C3E62, #E8D7BF);
     border-radius: 1.5rem;
     z-index: -1;
     animation: spin 3s linear infinite;
@@ -48,7 +48,7 @@
 
   /* Halftone pattern effect */
   .halftone {
-    background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-image: radial-gradient(circle, rgba(232,215,191,0.1) 1px, transparent 1px);
     background-size: 10px 10px;
   }
 }
@@ -124,10 +124,10 @@
 
   @keyframes pulse-glow {
     0%, 100% {
-      box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+      box-shadow: 0 0 20px rgba(44, 62, 98, 0.4);
     }
     50% {
-      box-shadow: 0 0 40px rgba(168, 85, 247, 0.8);
+      box-shadow: 0 0 40px rgba(44, 62, 98, 0.8);
     }
   }
 
@@ -155,3 +155,4 @@
     animation: pulse-glow 2s ease-in-out infinite;
   }
 }
+
