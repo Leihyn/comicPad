@@ -14,3 +14,10 @@ docs/
 .env
 frontend/node_modules/
 node_modules/
+
+# Claude Code files
+.claude/
+
+# Markdown files (except README.md)
+*.md
+!README.md
